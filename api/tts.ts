@@ -1,4 +1,4 @@
-import type { VercelRequest, VercelResponse } from '@vercel/node';
+import type { VercelRequest, VercelResponse } from './types';
 import { MsEdgeTTS, OUTPUT_FORMAT } from 'msedge-tts';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
