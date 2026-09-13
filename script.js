@@ -1117,12 +1117,117 @@ function initStormCanvas() {
     return segments;
   }
 
+  function createTouchLightning(targetX, targetY) {
+    let container = document.getElementById('touch-lightning-container');
+    if (!container) {
+      container = document.createElement('div');
+      container.id = 'touch-lightning-container';
+      container.className = 'touch-lightning-container';
+      container.setAttribute('aria-hidden', 'true');
+      document.body.appendChild(container);
+    }
+
+    const w = window.innerWidth;
+    const h = window.innerHeight;
+    const destX = targetX !== undefined ? targetX : w * 0.5;
+    const destY = targetY !== undefined ? targetY : h * 0.45;
+    const startX = destX + (Math.random() - 0.5) * 160;
+
+    // Generate fractal lightning bolt path with midpoint displacement
+    function generateBoltPath(x1, y1, x2, y2, displacement = 45) {
+      let pts = [{ x: x1, y: y1 }, { x: x2, y: y2 }];
+      let disp = displacement;
+      for (let it = 0; it < 4; it++) {
+        const next = [];
+        for (let i = 0; i < pts.length - 1; i++) {
+          const p1 = pts[i];
+          const p2 = pts[i + 1];
+          const midX = (p1.x + p2.x) / 2 + (Math.random() - 0.5) * disp;
+          const midY = (p1.y + p2.y) / 2 + (Math.random() - 0.5) * (disp * 0.35);
+          next.push(p1);
+          next.push({ x: midX, y: midY });
+        }
+        next.push(pts[pts.length - 1]);
+        pts = next;
+        disp *= 0.55;
+      }
+      return {
+        pathStr: pts.map((p, idx) => `${idx === 0 ? 'M' : 'L'} ${p.x.toFixed(1)} ${p.y.toFixed(1)}`).join(' '),
+        points: pts
+      };
+    }
+
+    const mainBolt = generateBoltPath(startX, 0, destX, destY, 50);
+
+    // Generate 2-3 branches splitting off from main bolt
+    let branchSvg = '';
+    const branchCount = 2 + Math.floor(Math.random() * 2);
+    for (let b = 0; b < branchCount; b++) {
+      const ptIdx = Math.floor(mainBolt.points.length * (0.2 + Math.random() * 0.55));
+      const origin = mainBolt.points[ptIdx] || { x: destX, y: destY * 0.5 };
+      const branchDestX = origin.x + (Math.random() - 0.5) * 160;
+      const branchDestY = origin.y + Math.random() * 110 + 30;
+      const branchBolt = generateBoltPath(origin.x, origin.y, branchDestX, branchDestY, 25);
+      branchSvg += `<path class="touch-lightning-branch-path" d="${branchBolt.pathStr}" />`;
+    }
+
+    // Generate radiating sparks at touch impact point
+    let sparksHtml = '';
+    const sparkCount = 8;
+    for (let s = 0; s < sparkCount; s++) {
+      const angle = (360 / sparkCount) * s + (Math.random() - 0.5) * 25;
+      const dist = 35 + Math.random() * 30;
+      sparksHtml += `<div class="touch-lightning-spark" style="--spark-angle: ${angle.toFixed(1)}deg; --spark-dist: ${dist.toFixed(1)}px;"></div>`;
+    }
+
+    // Create strike DOM element
+    const strikeEl = document.createElement('div');
+    strikeEl.className = 'touch-lightning-strike';
+    strikeEl.style.setProperty('--touch-x', `${destX}px`);
+    strikeEl.style.setProperty('--touch-y', `${destY}px`);
+
+    strikeEl.innerHTML = `
+      <div class="touch-lightning-flash"></div>
+      <div class="touch-lightning-ring"></div>
+      <div class="touch-lightning-ring-inner"></div>
+      ${sparksHtml}
+      <svg class="touch-lightning-svg" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none">
+        <path class="touch-lightning-glow-path" d="${mainBolt.pathStr}" />
+        <path class="touch-lightning-core-path" d="${mainBolt.pathStr}" />
+        ${branchSvg}
+      </svg>
+    `;
+
+    container.appendChild(strikeEl);
+
+    // Audio feedback
+    if (typeof soundManager !== 'undefined' && soundManager.playThunder) {
+      soundManager.playThunder();
+    }
+
+    // Auto clean-up after CSS animation ends
+    strikeEl.addEventListener('animationend', (e) => {
+      if (e.target === strikeEl || e.animationName === 'touchStrikeFade') {
+        strikeEl.remove();
+      }
+    });
+
+    setTimeout(() => {
+      if (strikeEl.parentNode) strikeEl.remove();
+    }, 1000);
+  }
+
+  window.createTouchLightning = createTouchLightning;
+
   function triggerLightningStrike(targetX, targetY) {
-    const startX = targetX !== undefined
-      ? targetX + (Math.random() - 0.5) * 100
-      : Math.random() * (width * 0.8) + width * 0.1;
-    const destX = targetX !== undefined ? targetX : startX + (Math.random() - 0.5) * 200;
-    const destY = targetY !== undefined ? targetY : height * (Math.random() * 0.5 + 0.45);
+    if (targetX !== undefined && targetY !== undefined) {
+      createTouchLightning(targetX, targetY);
+      return;
+    }
+
+    const startX = Math.random() * (width * 0.8) + width * 0.1;
+    const destX = startX + (Math.random() - 0.5) * 200;
+    const destY = height * (Math.random() * 0.5 + 0.45);
 
     const segments = generateBoltSegments(startX, 0, destX, destY);
     activeBolts.push({
@@ -1146,16 +1251,34 @@ function initStormCanvas() {
     soundManager.playThunder();
   }
 
-  window.addEventListener('click', (e) => {
+  let lastTouchLightningTime = 0;
+  function handlePointerLightning(e) {
+    const now = Date.now();
+    if (now - lastTouchLightningTime < 80) return;
     const target = e.target;
-    if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.closest('#thor-chatbot-widget') || target.closest('.dedicated-main-chat')) {
+    if (!target) return;
+    if (
+      target.tagName === 'INPUT' ||
+      target.tagName === 'TEXTAREA' ||
+      target.tagName === 'SELECT' ||
+      target.isContentEditable ||
+      target.closest('#thor-chatbot-widget') ||
+      target.closest('.dedicated-main-chat') ||
+      target.closest('#theme-matrix-panel') ||
+      target.closest('#theme-toggle-fab')
+    ) {
       return;
     }
-    triggerLightningStrike(e.clientX, e.clientY);
-  });
+    lastTouchLightningTime = now;
+    createTouchLightning(e.clientX, e.clientY);
+  }
+
+  window.addEventListener('pointerdown', handlePointerLightning, { passive: true });
 
   window.addEventListener('thor:lightning', (e) => {
-    triggerLightningStrike(e.detail?.x, e.detail?.y);
+    const x = e.detail?.x ?? (window.innerWidth * 0.5);
+    const y = e.detail?.y ?? (window.innerHeight * 0.45);
+    createTouchLightning(x, y);
   });
 
   function render() {

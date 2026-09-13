@@ -70,3 +70,33 @@ To recolor the whole website manually, open [`styles.css`](styles.css) and look 
 - **Bug Fixes Applied**:
   - **Hero Grid Typo**: Fixed `.hero-grid` camelCase `grid-templateColumns` to valid CSS `grid-template-columns`.
   - **Hero Art Purple Glow**: Fixed off-palette `rgba(157, 78, 221, 0.15)` in `.hero-art-glow` to dynamic `rgb(var(--accent-2-rgb) / 0.15)`, allowing it to harmonize with any chosen theme.
+
+---
+
+## 5. How to Edit the Touch / Click Lightning Effect in CSS
+
+The lightning strike triggered when you touch or click anywhere on screen is **100% styled and animated via CSS** in [`styles.css`](styles.css).
+
+### Quick Token Adjustments (Top of `styles.css` under `:root`):
+```css
+--touch-lightning-color:          var(--accent);  /* Main neon bolt glow color */
+--touch-lightning-color-2:        var(--accent-2);/* Secondary branch arc glow */
+--touch-lightning-core:           #ffffff;        /* High-energy white core */
+--touch-lightning-glow-width:     6px;            /* Outer glow bolt thickness */
+--touch-lightning-core-width:     2px;            /* Inner bolt core thickness */
+--touch-lightning-branch-width:   1.5px;          /* Secondary branch thickness */
+--touch-lightning-glow-blur:      18px;           /* Aura drop-shadow blur */
+--touch-lightning-ring-size:      130px;          /* Impact shockwave circle size */
+--touch-lightning-ring-border:    2px;            /* Impact shockwave ring border */
+--touch-lightning-duration:       0.45s;          /* Animation speed/duration */
+--touch-lightning-flash-opacity:  0.45;           /* Ambient screen flash brightness */
+```
+
+### Full Keyframe & Visual Styling (Search `TOUCH LIGHTNING EFFECT` in `styles.css`):
+- `.touch-lightning-glow-path`: Outer bolt path styling, filters, drop-shadows, and `@keyframes touchGlowFlicker`.
+- `.touch-lightning-core-path`: Bright white core path and `@keyframes touchCoreFlicker`.
+- `.touch-lightning-branch-path`: Forking bolt branches and `@keyframes touchBranchFlicker`.
+- `.touch-lightning-ring`: Ground shockwave ring and `@keyframes touchRingBurst`.
+- `.touch-lightning-spark`: Radial electrical sparks and `@keyframes touchSparkBurst`.
+- `.touch-lightning-flash`: Atmospheric screen bloom and `@keyframes touchFlashStrobe`.
+
