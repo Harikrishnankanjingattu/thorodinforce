@@ -1,7 +1,6 @@
-import type { VercelRequest, VercelResponse } from './types';
 import nodemailer from 'nodemailer';
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
+export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method Not Allowed' });
   }
@@ -14,7 +13,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   const recipientEmail = process.env.CANDIDATE_EMAIL || process.env.TO_EMAIL || 'harikrishnankanjingattu2005@gmail.com';
 
-  // Build the clean, majestic HTML email template
   const emailHtml = `
 <!DOCTYPE html>
 <html>
@@ -104,9 +102,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       });
       const result = await response.json();
       return res.status(200).json({ status: 'sent', provider: 'Resend', result, deliveryMode: 'Live Resend API' });
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : String(err);
-      console.error('Resend delivery failed:', msg);
+    } catch (err) {
+      console.error('Resend delivery failed:', err);
     }
   }
 
@@ -132,16 +129,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       });
 
       return res.status(200).json({ status: 'sent', provider: 'Nodemailer SMTP', deliveryMode: 'Live SMTP Relay' });
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : String(err);
-      console.error('SMTP delivery failed:', msg);
+    } catch (err) {
+      console.error('SMTP delivery failed:', err);
     }
   }
 
-  // 3. Fallback: Log and confirm successfully in simulation mode
+  // 3. Fallback: Simulation mode
   console.log('⚡ [THOR DISPATCH SIMULATION] Email Notification Generated:');
   console.log(`To: ${recipientEmail}`);
-  console.log(`Subject: 🦸 Someone Needs Your Help!`);
   console.log(`Payload:`, { name, age, location, email, urgency, grievance, submittedAt });
 
   return res.status(200).json({

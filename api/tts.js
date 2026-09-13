@@ -1,7 +1,6 @@
-import type { VercelRequest, VercelResponse } from './types';
 import { MsEdgeTTS, OUTPUT_FORMAT } from 'msedge-tts';
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
+export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method Not Allowed' });
   }
@@ -13,7 +12,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(400).json({ error: 'Missing text parameter' });
     }
 
-    // Clean text for natural speech
     const cleanText = text
       .replace(/⚡/g, '')
       .replace(/[*_#`~[\]()]/g, '')
@@ -34,8 +32,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       volume: '+15%',
     });
 
-    const chunks: Buffer[] = [];
-    audioStream.on('data', (chunk: Buffer) => chunks.push(chunk));
+    const chunks = [];
+    audioStream.on('data', (chunk) => chunks.push(chunk));
 
     audioStream.on('end', () => {
       const audioBuffer = Buffer.concat(chunks);

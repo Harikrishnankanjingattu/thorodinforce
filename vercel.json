@@ -1,11 +1,15 @@
 {
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": null,
+  "buildCommand": null,
+  "outputDirectory": ".",
   "rewrites": [
     {
       "source": "/api/(.*)",
       "destination": "/api/$1"
     },
     {
-      "source": "/(.*)",
+      "source": "/((?!api/|assets/|favicon\\.ico|favicon\\.svg|styles\\.css|script\\.js|.*\\.(?:css|js|ico|png|jpg|jpeg|svg|json|mp3|wav|webp|woff|woff2)$).*)",
       "destination": "/index.html"
     }
   ]

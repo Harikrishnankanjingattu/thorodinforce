@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='M50 5 L65 40 L45 40 L58 75 L30 45 L48 45 Z' fill='%2300e5ff' filter='drop-shadow(0 0 8px %2300e5ff)'/></svg>" />
+    <link rel="icon" type="image/x-icon" href="assets/favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="THOR — God of Thunder &amp; Guardian of the Storm-Wearied. Interactive superhero platform &amp; AI conversational guardian built for White Matrix submission." />
     <meta name="keywords" content="Thor, Superhero, AI Chatbot, Norse Mythology, God of Thunder, Portfolio, White Matrix" />
@@ -15,9 +15,761 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Cinzel+Decorative:wght@700;900&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Stylesheet -->
+    <link rel="stylesheet" href="styles.css" />
+
+    <!-- External Canvas Confetti library -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.4/dist/confetti.browser.min.js"></script>
   </head>
   <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
+    <!-- Background Interactive Storm Engine -->
+    <canvas id="storm-canvas" aria-hidden="true" style="position: fixed; inset: 0; z-index: 1; pointer-events: none; opacity: 0.95;"></canvas>
+
+    <!-- Lightning Flash Overlay -->
+    <div id="thunder-crack-overlay" class="thunder-crack-overlay" style="position: fixed; inset: 0; z-index: 99999; pointer-events: none;"></div>
+
+    <!-- ====================================================================
+         VIEW 1: LANDING PAGE ROUTE (/)
+         ==================================================================== -->
+    <div id="view-landing" style="position: relative; min-height: 100vh; background-color: var(--bg-abyss);">
+      
+      <!-- Top Navigation -->
+      <header class="site-header">
+        <div class="container">
+          <!-- Logo / Brand -->
+          <a href="#" class="nav-brand">
+            <div class="nav-avatar">
+              <img src="assets/thor-avatar.jpg" alt="Thor Avatar" />
+            </div>
+            <div class="nav-title-group">
+              <div class="nav-title">
+                THOR
+                <span class="nav-badge-norse">NORSE</span>
+              </div>
+              <div class="nav-subtitle">God of Thunder</div>
+            </div>
+          </a>
+
+          <!-- Desktop Nav Links -->
+          <nav class="desktop-nav">
+            <a href="#lore">Origin Lore</a>
+            <a href="#powers">Powers &amp; Mjölnir</a>
+            <a href="#mission">The Mission</a>
+            <a href="#personality">Voice &amp; Creed</a>
+          </nav>
+
+          <!-- Actions (Google Auth + Story + Chat Window + Sound toggle + Mobile menu) -->
+          <div class="nav-actions">
+            <!-- Auth Container (populated by script.js) -->
+            <div id="nav-auth-container"></div>
+
+            <!-- Story of Thor Button -->
+            <button id="nav-story-btn" type="button" class="brutal-btn" title="The Sagas of Thor - Chronicles &amp; Voice Recitation">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--cyan-core)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"/><path d="M6 2v20"/></svg>
+              <span>Story of Thor</span>
+            </button>
+
+            <!-- Dedicated Chat Window Launcher -->
+            <a href="#chat" id="nav-open-chat-link" class="nav-link-chat-window" title="Open Dedicated Thor Chat Window">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--cyan-core)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+              <span>Chat Window</span>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--cyan-core)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            </a>
+
+            <!-- Sound Toggle -->
+            <button id="nav-sound-btn" class="btn-sound-toggle" title="Toggle Thunder &amp; Chimes Sounds">
+              <svg id="sound-icon-on" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
+              <svg id="sound-icon-off" class="hidden" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>
+            </button>
+
+            <!-- Mobile Menu Toggle -->
+            <button id="mobile-menu-toggle" class="mobile-menu-btn" aria-label="Toggle navigation menu">
+              <svg id="menu-icon-bars" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
+              <svg id="menu-icon-close" class="hidden" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" x2="6" y1="6" y2="18"/><line x1="6" x2="18" y1="6" y2="18"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Mobile Drawer -->
+        <div id="mobile-drawer" class="mobile-drawer hidden">
+          <a href="#lore" class="mobile-nav-link">Origin Lore</a>
+          <a href="#powers" class="mobile-nav-link">Powers &amp; Mjölnir</a>
+          <a href="#mission" class="mobile-nav-link">The Mission</a>
+          <a href="#personality" class="mobile-nav-link">Voice &amp; Creed</a>
+          <a href="#chat" class="mobile-nav-link mobile-chat-link">
+            <span>Open Chat Window</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          </a>
+        </div>
+      </header>
+
+      <!-- Main Content Sections -->
+      <main>
+        <!-- Hero Section -->
+        <section id="hero">
+          <div class="container" style="position: relative; z-index: 3;">
+            <div class="hero-grid">
+              <!-- Left Column: Story & CTA -->
+              <div style="display: flex; flex-direction: column; gap: 24px;">
+                <!-- Runic Badges -->
+                <div style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center;">
+                  <span class="badge-runic">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>
+                    <span>Norse Mythological Lore</span>
+                  </span>
+                  <span class="badge-runic badge-gold">
+                    <span>ᛏ Thor Odinson</span>
+                  </span>
+                  <button type="button" id="hero-strike-lightning-btn" class="badge-runic" style="cursor: pointer; background: rgba(0, 242, 254, 0.15); border: 1px solid var(--cyan-core); box-shadow: 0 0 14px rgba(0, 242, 254, 0.3);" title="Trigger celestial thunderbolt">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="#00f2fe" stroke="#00f2fe" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                    <span>⚡ Click to Strike Lightning</span>
+                  </button>
+                </div>
+
+                <!-- Main Heading -->
+                <div>
+                  <div class="hero-subhead">Guardian of the Storm-Wearied</div>
+                  <h1 class="electric-title-anim hero-title">THOR</h1>
+                  <div class="hero-ornate-title">God of Thunder &amp; Tempest</div>
+                </div>
+
+                <!-- Tagline / Catchphrase -->
+                <div class="hero-tagline-box">
+                  <p class="hero-tagline-text">&ldquo;No storm lasts forever — and you don't have to weather it alone.&rdquo;</p>
+                  <span class="hero-tagline-sub">— The Vow to Midgard</span>
+                </div>
+
+                <!-- Description -->
+                <p class="hero-desc">
+                  Exiled by choice from the feast halls of Asgard, Thor now walks the realm of mortals. 
+                  Channeling the fury of the gathering storm into an enduring shield, he stands between ordinary 
+                  people and the crises that threaten to overwhelm them.
+                </p>
+
+                <!-- CTA Group -->
+                <div class="hero-actions">
+                  <button type="button" id="hero-summon-btn" class="btn-electric" style="padding: 18px 38px; font-size: 1.05rem; animation: electricPulse 3s infinite;">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="#00f2fe" stroke="#00f2fe" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                    <span>Summon Thor</span>
+                  </button>
+
+                  <a href="#lore" class="btn-secondary" style="padding: 16px 28px; font-size: 0.95rem;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--cyan-core)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
+                    <span>Explore The Lore</span>
+                  </a>
+
+                  <button type="button" id="hero-story-btn" class="brutal-btn" style="padding: 16px 24px; font-size: 0.95rem; background: rgba(0, 242, 254, 0.12); border: 2px solid var(--cyan-core); color: #ffffff; border-radius: 12px; display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-family: var(--font-mythic); font-weight: 800; box-shadow: 4px 4px 0px #00f2fe; transition: all 0.15s ease;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--cyan-core)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"/><path d="M6 2v20"/></svg>
+                    <span>The Sagas of Thor</span>
+                  </button>
+                </div>
+
+                <!-- Atmospheric Telemetry HUD -->
+                <div class="hero-telemetry-hud">
+                  <div>
+                    <div class="hud-label">Storm Charge</div>
+                    <div class="hud-value">1.21 GV</div>
+                  </div>
+                  <div>
+                    <div class="hud-label">Mjölnir Sync</div>
+                    <div class="hud-value" style="color: var(--gold-asgard);">100% Star-Core</div>
+                  </div>
+                  <div>
+                    <div class="hud-label">Midgard Vigil</div>
+                    <div class="hud-value" style="color: #4facfe;">Active Guardian</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Right Column: Hero Visual Artwork with Norse Frame & Glow -->
+              <div class="hero-art-container">
+                <div class="hero-art-glow"></div>
+                <div class="glass-panel hero-art-card">
+                  <div class="hero-art-inner">
+                    <img src="assets/thor-hero.jpg" alt="Thor, Norse God of Thunder wielding Mjölnir in the tempest" />
+                    <div class="hero-art-vignette"></div>
+                    <div class="hero-art-badge">
+                      <div style="display: flex; align-items: center; gap: 10px;">
+                        <div style="width: 10px; height: 10px; border-radius: 50%; background-color: var(--cyan-core); box-shadow: 0 0 10px var(--cyan-core); animation: vitalPulse 2s infinite;"></div>
+                        <span style="font-family: var(--font-mythic); font-size: 0.85rem; font-weight: 700; color: #ffffff; letter-spacing: 0.05em;">Mjölnir Awakening</span>
+                      </div>
+                      <span style="font-family: var(--font-mythic); font-size: 0.75rem; color: var(--gold-asgard); letter-spacing: 0.08em;">STAR-FORGED RUNES</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <div class="section-divider"></div>
+
+        <!-- Origin Story Section -->
+        <section id="lore">
+          <div class="container">
+            <div class="section-header-center">
+              <div class="badge-runic" style="margin-bottom: 16px;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>
+                <span>Narrative Chronicle</span>
+              </div>
+              <h2>The Descent to Midgard</h2>
+              <p>How the prince of thunder cast aside royal complacency, felt the fragility of mortal life, and bound his divine power to the protection of humanity.</p>
+            </div>
+
+            <!-- Timeline Navigation Tabs -->
+            <div id="timeline-tabs" class="timeline-tabs-grid"></div>
+
+            <!-- Active Chronicle Showcase Card -->
+            <div id="chronicle-card" class="brutal-glass chronicle-showcase-card"></div>
+
+            <!-- The Full Sagas of Thor - Cyber-Neobrutalist Recitation Banner -->
+            <div class="brutal-glass" style="margin-top: 40px; padding: 28px 32px; border-radius: 16px; border: 2px solid var(--cyan-core); box-shadow: 6px 6px 0px #00f2fe; background: linear-gradient(135deg, rgba(2, 6, 18, 0.95) 0%, rgba(0, 20, 45, 0.92) 100%); display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 20px;">
+              <div style="max-width: 640px;">
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                  <span class="brutal-badge">EPIC CHRONICLES</span>
+                  <span style="fontSize: 0.78rem; color: var(--cyan-core); font-weight: 700;">STUDIO NEURAL VOCAL RECITAL</span>
+                </div>
+                <h3 style="font-family: var(--font-mythic); font-size: 1.35rem; font-weight: 900; color: #ffffff; margin-bottom: 6px; letter-spacing: 0.04em;">The Story of Thor: From Dying Star to Guardian Covenant</h3>
+                <p style="font-size: 0.90rem; color: rgba(255, 255, 255, 0.78); margin: 0; line-height: 1.6;">Experience all 4 complete sagas with rich prose, celestial lore, and Thor's aged muscular kingly neural voice reciting every passage with thunderous presence.</p>
+              </div>
+
+              <button id="lore-open-story-btn" class="brutal-btn" style="padding: 16px 28px; border-radius: 12px; background: var(--cyan-core); border: 2px solid #ffffff; color: #000000; font-family: var(--font-mythic); font-size: 0.92rem; font-weight: 900; letter-spacing: 0.06em; cursor: pointer; box-shadow: 3px 3px 0px #00f2fe; display: inline-flex; align-items: center; gap: 10px; flex-shrink: 0;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"/><path d="M6 2v20"/></svg>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
+                <span>⚡ Open &amp; Hear The Sagas</span>
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <div class="section-divider"></div>
+
+        <!-- Powers Section -->
+        <section id="powers">
+          <div class="container">
+            <div class="section-header-center">
+              <div class="badge-runic" style="margin-bottom: 16px;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>
+                <span>Divine Capacities</span>
+              </div>
+              <h2>Powers &amp; Divine Artifact</h2>
+              <p>Forged in celestial storms and honed through mortal solidarity. Explore the attributes that make Thor both an unstoppable tempest and a steadfast protector.</p>
+            </div>
+
+            <!-- Powers Grid -->
+            <div id="powers-grid" class="powers-grid"></div>
+
+            <!-- Featured Artifact Showcase: Mjölnir -->
+            <div class="brutal-glass mjolnir-showcase-card">
+              <!-- Mjölnir Visual -->
+              <div style="position: relative; border-radius: 20px; overflow: hidden; border: 1px solid rgba(0, 242, 254, 0.3); box-shadow: 0 0 35px rgba(0, 242, 254, 0.25); max-height: 380px;">
+                <img src="assets/mjolnir.jpg" alt="Mjölnir — Geometric Star-Forged War Hammer" style="width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.5s ease;" onmouseenter="this.style.transform='scale(1.04)'" onmouseleave="this.style.transform='scale(1.0)'" />
+                <div style="position: absolute; top: 16px; left: 16px; background: #000000; backdrop-filter: blur(10px); border: 1px solid var(--cyan-core); border-radius: 8px; padding: 6px 12px; font-family: var(--font-mythic); font-size: 0.75rem; color: var(--cyan-core); font-weight: 700; box-shadow: 0 0 10px rgba(0, 242, 254, 0.4);">
+                  ENCHANTED STAR-METAL
+                </div>
+              </div>
+
+              <!-- Mjölnir Specs & Lore -->
+              <div>
+                <div class="badge-runic badge-gold" style="margin-bottom: 14px;">
+                  <span>ᛗ Symbolic Conduit</span>
+                </div>
+                <h3 style="font-family: var(--font-mythic); font-size: clamp(1.8rem, 3vw, 2.4rem); color: #ffffff; margin-bottom: 12px; letter-spacing: 0.04em;">Mjölnir: The Star-Forged Hammer</h3>
+                <p style="font-size: 1rem; color: var(--text-secondary); line-height: 1.8; margin-bottom: 24px;">
+                  Forged in the heart of a dying celestial star and etched with Elder Futhark runes of binding. 
+                  Mjölnir cannot be wielded for selfish conquest; its enchantments only awaken in defense of the 
+                  vulnerable. Whenever cast into the tempest, it cleaves the squall and returns instantly to Thor’s hand.
+                </p>
+
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; border-top: 1px solid rgba(255, 255, 255, 0.08); padding-top: 20px;">
+                  <div>
+                    <div style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase;">Forging Medium</div>
+                    <div style="font-family: var(--font-mythic); font-size: 1rem; color: #ffffff; font-weight: 700;">Dying Star Core</div>
+                  </div>
+                  <div>
+                    <div style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase;">Enchantment</div>
+                    <div style="font-family: var(--font-mythic); font-size: 1rem; color: var(--gold-asgard); font-weight: 700;">Return-to-Hand</div>
+                  </div>
+                  <div>
+                    <div style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase;">Aesthetic Note</div>
+                    <div style="font-family: var(--font-mythic); font-size: 1rem; color: var(--cyan-core); font-weight: 700;">Geometric Runic</div>
+                  </div>
+                  <div>
+                    <div style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase;">Status</div>
+                    <div style="font-family: var(--font-mythic); font-size: 1rem; color: #4facfe; font-weight: 700;">Resonating with Midgard</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <div class="section-divider"></div>
+
+        <!-- Mission Section -->
+        <section id="mission">
+          <div class="container">
+            <div class="glass-panel mission-panel">
+              <div style="position: absolute; top: -20%; right: -10%; width: 500px; height: 500px; background: radial-gradient(circle, rgba(0, 242, 254, 0.12) 0%, transparent 70%); pointer-events: none;"></div>
+
+              <div style="max-width: 820px;">
+                <div class="badge-runic" style="margin-bottom: 20px;">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                  <span>Sacred Covenant</span>
+                </div>
+
+                <h2 style="font-family: var(--font-mythic); font-size: clamp(2.2rem, 4.5vw, 3.6rem); color: #ffffff; line-height: 1.15; letter-spacing: 0.04em; margin-bottom: 24px;">
+                  &ldquo;To Stand Between Mortals &amp; The Storm.&rdquo;
+                </h2>
+
+                <p style="font-size: 1.15rem; color: var(--text-secondary); line-height: 1.85; margin-bottom: 36px;">
+                  The storm is not always rain, wind, and lightning. Often, the fiercest tempests are fought 
+                  within the quiet chambers of the human spirit — grief, isolation, insurmountable challenges, 
+                  or carrying a burden so heavy it threatens to break you.
+                </p>
+
+                <!-- Two Pillars of Protection -->
+                <div class="mission-grid">
+                  <div style="background: rgba(5, 10, 22, 0.65); border: 1px solid rgba(0, 242, 254, 0.2); border-radius: 16px; padding: 24px; backdrop-filter: blur(8px);">
+                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--cyan-core)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="16" y1="13" x2="16" y2="21"/><line x1="8" y1="13" x2="8" y2="21"/><line x1="12" y1="15" x2="12" y2="23"/><path d="M20 16.58A5 5 0 0 0 18 7h-1.26A8 8 0 1 0 4 15.25"/></svg>
+                      <h4 style="font-family: var(--font-mythic); font-size: 1.05rem; color: #ffffff;">The Outer Tempests</h4>
+                    </div>
+                    <p style="font-size: 0.92rem; color: var(--text-secondary); line-height: 1.7;">
+                      Natural cataclysms, disasters, physical vulnerability, and perils where human strength 
+                      falls short against elemental fury.
+                    </p>
+                  </div>
+
+                  <div style="background: rgba(5, 10, 22, 0.65); border: 1px solid rgba(0, 242, 254, 0.25); border-radius: 16px; padding: 24px; backdrop-filter: blur(8px);">
+                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--cyan-core)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 14h2a2 2 0 1 0 0-4h-3c-.6 0-1.1.2-1.4.6L3 16"/><path d="m7 20 1.6-1.4c.3-.4.8-.6 1.4-.6h4c1.1 0 2.1-.4 2.8-1.2l4.6-4.4a2 2 0 0 0-2.8-2.8L15 13"/><path d="M2 13h4"/><path d="M2 17h6"/></svg>
+                      <h4 style="font-family: var(--font-mythic); font-size: 1.05rem; color: #ffffff;">The Inner Tempests</h4>
+                    </div>
+                    <p style="font-size: 0.92rem; color: var(--text-secondary); line-height: 1.7;">
+                      Loneliness, quiet desperation, unspoken distress, and the belief that you are utterly forgotten. 
+                      No soul calls upon Thor in vain.
+                    </p>
+                  </div>
+                </div>
+
+                <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 20px;">
+                  <button type="button" id="mission-summon-btn" class="btn-electric" style="padding: 16px 36px;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="#00f2fe" stroke="#00f2fe" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                    <span>Call Upon The Thunder</span>
+                  </button>
+                  <div style="font-size: 0.88rem; color: var(--text-muted);">
+                    Every message is heard personally by Thor and dispatched in real time.
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <div class="section-divider"></div>
+
+        <!-- Personality Section -->
+        <section id="personality">
+          <div class="container">
+            <div class="section-header-center">
+              <div class="badge-runic" style="margin-bottom: 16px;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>
+                <span>Character &amp; Voice</span>
+              </div>
+              <h2>In His Own Words</h2>
+              <p>Larger than life, yet deeply rooted in empathy. Discover the cadence and spirit of the god who chose to be a friend rather than a distant ruler.</p>
+            </div>
+
+            <!-- Personality Traits Row -->
+            <div id="personality-traits-grid" class="traits-grid"></div>
+
+            <!-- Interactive Voice Quotes Carousel / Showcase -->
+            <div class="brutal-glass" style="padding: 44px; border-radius: 24px; border: 2px solid var(--cyan-core); box-shadow: 6px 6px 0px #00f2fe; backdrop-filter: blur(24px); background: rgba(2, 6, 18, 0.92);">
+              <div id="quote-tabs-container" style="display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 32px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); padding-bottom: 20px;"></div>
+
+              <div id="quote-display-container" style="position: relative; min-height: 140px;"></div>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <!-- Footer -->
+      <footer>
+        <div class="container">
+          <!-- Top Banner: Summon Thor Final CTA -->
+          <div class="glass-panel" style="padding: 44px; border-radius: 24px; border: 1px solid rgba(0, 242, 254, 0.4); box-shadow: 0 0 50px rgba(0, 242, 254, 0.2); display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 24px; margin-bottom: 64px; background: linear-gradient(135deg, rgba(14, 26, 52, 0.8) 0%, rgba(7, 13, 26, 0.9) 100%);">
+            <div>
+              <div class="badge-runic" style="margin-bottom: 10px;">
+                <span>ᛏ Open Midgard Channel</span>
+              </div>
+              <h3 style="font-family: var(--font-mythic); font-size: clamp(1.6rem, 3vw, 2.2rem); color: #ffffff; margin-bottom: 8px; letter-spacing: 0.04em;">Ready To Call Upon The Thunder?</h3>
+              <p style="font-size: 0.98rem; color: var(--text-secondary);">No matter how dark the clouds appear, Thor stands ready to listen.</p>
+            </div>
+
+            <button type="button" id="footer-summon-btn" class="btn-electric" style="padding: 16px 36px; font-size: 1rem;">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="#00f2fe" stroke="#00f2fe" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+              <span>Summon Thor Now</span>
+            </button>
+          </div>
+
+          <!-- Footer Meta Columns -->
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 40px; margin-bottom: 50px;">
+            <div>
+              <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 14px;">
+                <img src="assets/thor-avatar.jpg" alt="Thor" style="width: 36px; height: 36px; border-radius: 8px; object-fit: cover;" />
+                <span style="font-family: var(--font-mythic); font-size: 1.2rem; font-weight: 800; color: #ffffff;">THOR · MIDGARD</span>
+              </div>
+              <p style="font-size: 0.88rem; color: var(--text-muted); line-height: 1.7; margin-bottom: 16px;">
+                An interactive mythological superhero experience &amp; conversational AI guardian built for the White Matrix Assignment Submission.
+              </p>
+              <div style="font-size: 0.78rem; color: var(--text-muted); font-style: italic;">
+                Original interpretation rooted in public-domain Norse mythology.
+              </div>
+            </div>
+
+            <div>
+              <h4 style="font-family: var(--font-mythic); font-size: 0.95rem; color: var(--gold-asgard); margin-bottom: 16px; letter-spacing: 0.08em;">Prepared For</h4>
+              <div style="font-size: 0.9rem; color: var(--text-secondary); display: flex; flex-direction: column; gap: 10px;">
+                <div style="font-weight: 600; color: #ffffff;">White Matrix Assignment Submission</div>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--cyan-core)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                  <span>+91 88 91 67 61 43</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--cyan-core)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                  <a href="mailto:harikrishnankanjingattu2005@gmail.com" style="color: var(--cyan-core); text-decoration: none; word-break: break-all;">harikrishnankanjingattu2005@gmail.com</a>
+                </div>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--cyan-core)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                  <span>www.whitematrix.co.in</span>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <h4 style="font-family: var(--font-mythic); font-size: 0.95rem; color: var(--cyan-core); margin-bottom: 16px; letter-spacing: 0.08em;">Navigation</h4>
+              <ul style="list-style: none; display: flex; flex-direction: column; gap: 8px;">
+                <li><a href="#hero" style="color: var(--text-secondary); text-decoration: none; font-size: 0.88rem;">Top / The Descent</a></li>
+                <li><a href="#lore" style="color: var(--text-secondary); text-decoration: none; font-size: 0.88rem;">Origin Lore</a></li>
+                <li><a href="#powers" style="color: var(--text-secondary); text-decoration: none; font-size: 0.88rem;">Powers &amp; Mjölnir</a></li>
+                <li><a href="#mission" style="color: var(--text-secondary); text-decoration: none; font-size: 0.88rem;">The Mission</a></li>
+                <li><a href="#personality" style="color: var(--text-secondary); text-decoration: none; font-size: 0.88rem;">Voice &amp; Personality</a></li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Bottom Legal & Back to Top -->
+          <div style="border-top: 1px solid rgba(255, 255, 255, 0.08); padding-top: 24px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; font-size: 0.82rem; color: var(--text-muted);">
+            <div>&copy; 2026 Thor Guardian Platform. All rights reserved. Norse Mythology Public Domain Creative Work.</div>
+            <button type="button" id="scroll-to-top-btn" style="background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border-subtle); border-radius: 8px; padding: 8px 14px; color: var(--cyan-core); cursor: pointer; display: flex; align-items: center; gap: 6px; font-family: var(--font-mythic); font-size: 0.78rem;">
+              <span>Return to Skies</span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
+            </button>
+          </div>
+        </div>
+      </footer>
+
+      <!-- Persistent Floating CTA -->
+      <div id="floating-cta" class="floating-cta-container">
+        <button type="button" id="floating-cta-btn" class="btn-electric" style="padding: 16px 26px; border-radius: 50px; box-shadow: 0 0 25px rgba(0, 242, 254, 0.6), 0 0 50px rgba(157, 78, 221, 0.3); animation: electricPulse 2.5s infinite ease-in-out; display: flex; align-items: center; gap: 12px; border: 2px solid #00f2fe;" aria-label="Summon Thor to open conversational AI guardian">
+          <div style="position: relative; display: flex; align-items: center; justify-content: center;">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="#00f2fe" stroke="#00f2fe" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          </div>
+          <div style="text-align: left;">
+            <div style="font-size: 0.85rem; font-weight: 900; letter-spacing: 0.1em;">SUMMON THOR</div>
+            <div style="font-size: 0.65rem; color: #ccefff; letter-spacing: 0.04em; font-family: var(--font-sans); text-transform: none;">Need help? Talk to me</div>
+          </div>
+        </button>
+      </div>
+
+      <!-- Conversational Chatbot Widget -->
+      <div id="thor-chatbot-widget" class="hidden">
+        <!-- Chat Header -->
+        <div class="chat-header">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <div style="position: relative; width: 34px; height: 34px; border-radius: 8px; overflow: hidden; border: 1.5px solid var(--cyan-core); flex-shrink: 0;">
+              <img src="assets/thor-avatar.jpg" alt="Thor" style="width: 100%; height: 100%; object-fit: cover;" />
+            </div>
+            <div>
+              <div style="font-family: var(--font-mythic); font-size: 0.88rem; font-weight: 800; color: #ffffff; display: flex; align-items: center; gap: 6px;">
+                <span>THOR ODINSON</span>
+                <span style="font-size: 0.62rem; color: var(--cyan-core); background: rgba(0, 242, 254, 0.15); border: 1px solid rgba(0, 242, 254, 0.4); padding: 1px 4px; border-radius: 4px;">AI</span>
+              </div>
+              <div style="font-size: 0.68rem; color: var(--cyan-core); display: flex; align-items: center; gap: 4px;">
+                <span style="width: 6px; height: 6px; border-radius: 50%; background-color: var(--cyan-core); box-shadow: 0 0 6px var(--cyan-core);"></span>
+                <span>NEURAL VIGIL ACTIVE</span>
+              </div>
+            </div>
+          </div>
+
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <!-- Voice toggle -->
+            <button type="button" id="chat-voice-toggle-btn" class="brutal-btn" style="padding: 4px 8px; font-size: 0.72rem;" title="Toggle Thor's Voice Recitation">
+              <span id="chat-voice-status-icon">🔊</span>
+            </button>
+            <!-- Key button -->
+            <button type="button" id="chat-key-btn" class="brutal-btn" style="padding: 4px 8px; font-size: 0.72rem;" title="Configure NVIDIA AI Neural Key">
+              <span>⚡ API</span>
+            </button>
+            <!-- Minimize -->
+            <button type="button" id="chat-minimize-btn" class="brutal-btn" style="padding: 4px 8px;" title="Minimize Chat Window">
+              <span>_</span>
+            </button>
+            <!-- Expand -->
+            <button type="button" id="chat-expand-btn" class="brutal-btn" style="padding: 4px 8px;" title="Maximize / Restore">
+              <span>⤢</span>
+            </button>
+            <!-- Close -->
+            <button type="button" id="chat-close-btn" class="brutal-btn" style="padding: 4px 8px;" title="Close Chat Widget">
+              <span>✕</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Auth Gate Container (shown if not logged in & not guest) -->
+        <div id="chat-auth-gate" class="hidden" style="flex: 1; padding: 24px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 18px; background: rgba(2, 6, 18, 0.98);">
+          <div style="width: 58px; height: 58px; border-radius: 50%; background: rgba(0, 242, 254, 0.1); border: 2px solid var(--cyan-core); display: flex; align-items: center; justify-content: center; box-shadow: 0 0 20px rgba(0, 242, 254, 0.3);">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="#00f2fe" stroke="#00f2fe" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          </div>
+          <h3 style="font-family: var(--font-mythic); font-size: 1.15rem; color: #ffffff;">Enter Thor's Sanctuary</h3>
+          <p style="font-size: 0.85rem; color: var(--text-secondary); max-width: 320px; line-height: 1.6;">
+            Sign in with Google to establish a verified Asgardian link, or enter immediately as a Guest Warrior.
+          </p>
+
+          <!-- Auth Diagnostics Alert Banner (if domain not whitelisted) -->
+          <div id="auth-diagnostic-banner" class="hidden" style="background: rgba(254, 80, 80, 0.12); border: 1px solid rgba(254, 80, 80, 0.5); border-radius: 10px; padding: 12px; font-size: 0.76rem; color: #ffb4b4; text-align: left; max-width: 380px;">
+            <div id="auth-diagnostic-title" style="font-weight: 700; margin-bottom: 4px; color: #ffffff;"></div>
+            <div id="auth-diagnostic-msg" style="margin-bottom: 8px;"></div>
+            <button type="button" id="auth-copy-domain-btn" class="brutal-btn" style="padding: 4px 10px; font-size: 0.70rem;">
+              <span>Copy Origin Domain</span>
+            </button>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 10px; width: 100%; max-width: 300px;">
+            <button type="button" id="chat-google-login-btn" class="btn-electric" style="padding: 12px 20px; font-size: 0.82rem; width: 100%;">
+              <svg width="16" height="16" viewBox="0 0 24 24">
+                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+              </svg>
+              <span>Sign In with Google</span>
+            </button>
+            <button type="button" id="chat-guest-login-btn" class="btn-secondary" style="padding: 10px 18px; font-size: 0.82rem; width: 100%;">
+              <span>Enter as Guest Warrior</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Distress Beacon Drawer (Slide down) -->
+        <div id="chat-beacon-drawer" class="hidden" style="background: rgba(3, 8, 20, 0.98); border-bottom: 2px solid var(--cyan-core); padding: 18px; overflow-y: auto; max-height: 380px;">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+            <div style="font-family: var(--font-mythic); font-size: 0.95rem; font-weight: 800; color: var(--cyan-core);">
+              ⚡ DISPATCH DISTRESS BEACON
+            </div>
+            <button type="button" id="chat-beacon-drawer-close" class="brutal-btn" style="padding: 2px 6px;">✕</button>
+          </div>
+          <form id="beacon-form" style="display: flex; flex-direction: column; gap: 10px;">
+            <div>
+              <label style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase;">Name</label>
+              <input type="text" id="beacon-name" class="chat-input-field" placeholder="Mortal name" required />
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+              <div>
+                <label style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase;">Age (Winters)</label>
+                <input type="text" id="beacon-age" class="chat-input-field" placeholder="e.g. 24" />
+              </div>
+              <div>
+                <label style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase;">Location</label>
+                <input type="text" id="beacon-location" class="chat-input-field" placeholder="Midgard realm" />
+              </div>
+            </div>
+            <div>
+              <label style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase;">Your Email Address</label>
+              <input type="email" id="beacon-email" class="chat-input-field" placeholder="you@domain.com" required />
+            </div>
+            <div>
+              <label style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase;">Urgency Level</label>
+              <select id="beacon-urgency" class="chat-input-field" style="background: #020712;">
+                <option value="Low (Mild Gathering Squall)">Low (Mild Gathering Squall)</option>
+                <option value="Medium (Rising Gale)" selected>Medium (Rising Gale)</option>
+                <option value="High (Fierce Storm Surge)">High (Fierce Storm Surge)</option>
+                <option value="Critical (Cataclysmic Tempest)">Critical (Cataclysmic Tempest)</option>
+              </select>
+            </div>
+            <div>
+              <label style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase;">Grievance / What Storm Do You Face?</label>
+              <textarea id="beacon-grievance" class="chat-input-field" rows="3" placeholder="Speak plainly of the crisis you weather..." required></textarea>
+            </div>
+            <button type="submit" id="beacon-submit-btn" class="btn-electric" style="padding: 10px; font-size: 0.85rem; width: 100%;">
+              <span>Dispatch Signal to Alter-Ego</span>
+            </button>
+          </form>
+        </div>
+
+        <!-- Messages Container -->
+        <div id="chat-messages" class="chat-messages-container"></div>
+
+        <!-- Mjölnir Thinking Loader Indicator -->
+        <div id="chat-loader-container" class="hidden" style="padding: 8px 16px;"></div>
+
+        <!-- Quick Reply Chips -->
+        <div id="chat-quick-chips" class="quick-chips-bar">
+          <button type="button" class="quick-chip" data-msg="Who forged Mjölnir and how?">Who forged Mjölnir?</button>
+          <button type="button" class="quick-chip" data-msg="Why did you turn away from Asgard's feast halls?">Why did you leave Asgard?</button>
+          <button type="button" class="quick-chip" data-msg="How can I withstand the storm that burdens me?">How to withstand my storm?</button>
+          <button type="button" class="quick-chip" data-beacon="true">⚡ Dispatch distress beacon</button>
+        </div>
+
+        <!-- Input Bar -->
+        <div class="chat-input-bar">
+          <button type="button" id="chat-open-beacon-btn" class="brutal-btn" style="padding: 10px 12px;" title="Open Distress Beacon Form">
+            <span>⚡ BEACON</span>
+          </button>
+          <input type="text" id="chat-input" class="chat-input-field" placeholder="Speak with Thor Odinson..." />
+          <button type="button" id="chat-send-btn" class="btn-electric" style="padding: 10px 18px; border-radius: 10px;" title="Send message to Thor">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="#00f2fe" stroke="#00f2fe" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- The Sagas of Thor Modal -->
+      <div id="thor-story-modal" class="modal-backdrop hidden"></div>
+
+      <!-- Evaluator Email Inspector Modal -->
+      <div id="email-inspector-modal" class="modal-backdrop hidden"></div>
+
+      <!-- NVIDIA API Key Modal -->
+      <div id="nvidia-key-modal" class="modal-backdrop hidden">
+        <div class="brutal-glass" style="max-width: 480px; width: 100%; padding: 28px; background: rgba(3, 8, 20, 0.98);">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+            <div style="font-family: var(--font-mythic); font-size: 1.1rem; color: #ffffff; font-weight: 800;">
+              ⚡ NVIDIA NEURAL COGNITION KEY
+            </div>
+            <button type="button" id="close-key-modal-btn" class="brutal-btn" style="padding: 4px 8px;">✕</button>
+          </div>
+          <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 16px; line-height: 1.6;">
+            The app comes pre-configured with active cloud AI keys. You can also inject your custom personal key from
+            <a href="https://build.nvidia.com" target="_blank" rel="noopener noreferrer" style="color: var(--cyan-core);">build.nvidia.com</a>:
+          </p>
+          <form id="key-config-form" style="display: flex; flex-direction: column; gap: 14px;">
+            <input type="password" id="custom-nvidia-key-input" class="chat-input-field" placeholder="nvapi-..." />
+            <div style="display: flex; gap: 10px;">
+              <button type="submit" class="btn-electric" style="flex: 1; padding: 12px; font-size: 0.85rem;">Save Key</button>
+              <button type="button" id="clear-key-btn" class="btn-secondary" style="padding: 12px; font-size: 0.85rem;">Reset</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Floating Evaluator Inspector Quick-Access Button if a submission exists -->
+      <button id="floating-inspector-btn" class="hidden" type="button" title="Review latest dispatched notification email" style="position: fixed; bottom: 28px; left: 28px; z-index: 950; background: rgba(11, 22, 44, 0.9); border: 1px solid var(--cyan-core); border-radius: 30px; padding: 10px 18px; color: #ffffff; display: flex; align-items: center; gap: 8px; box-shadow: 0 0 20px rgba(0, 242, 254, 0.3); cursor: pointer; font-family: var(--font-mythic); font-size: 0.8rem; backdrop-filter: blur(10px);">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--cyan-core)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+        <span>Inspect Latest Dispatch</span>
+      </button>
+
+    </div>
+
+    <!-- ====================================================================
+         VIEW 2: DEDICATED CHAT COMMAND CENTER (/chat)
+         ==================================================================== -->
+    <div id="view-dedicated-chat" class="hidden">
+      <div class="dedicated-container">
+        <!-- Dedicated Topbar -->
+        <div class="dedicated-topbar">
+          <div style="display: flex; align-items: center; gap: 14px;">
+            <button type="button" id="dedicated-back-home-btn" class="brutal-btn" style="padding: 8px 14px;">
+              <span>← Return to Midgard</span>
+            </button>
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <div style="width: 34px; height: 34px; border-radius: 8px; overflow: hidden; border: 1.5px solid var(--cyan-core);">
+                <img src="assets/thor-avatar.jpg" alt="Thor" style="width: 100%; height: 100%; object-fit: cover;" />
+              </div>
+              <div>
+                <div style="font-family: var(--font-mythic); font-size: 0.95rem; font-weight: 800; color: #ffffff;">
+                  THOR COMMAND CENTER
+                </div>
+                <div style="font-size: 0.68rem; color: var(--cyan-core);">// DEDICATED CONVERSATIONAL VIGIL //</div>
+              </div>
+            </div>
+          </div>
+
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <button type="button" id="dedicated-voice-toggle-btn" class="brutal-btn" style="padding: 6px 12px; font-size: 0.75rem;">
+              <span>🔊 Voice Engine</span>
+            </button>
+            <button type="button" id="dedicated-key-btn" class="brutal-btn" style="padding: 6px 12px; font-size: 0.75rem;">
+              <span>⚡ API Key</span>
+            </button>
+            <div id="dedicated-auth-container"></div>
+          </div>
+        </div>
+
+        <!-- Dedicated Body Layout -->
+        <div class="dedicated-body">
+          <!-- Left Telemetry Sidebar -->
+          <div class="dedicated-sidebar">
+            <div class="badge-runic" style="justify-content: center;">
+              <span>ᛏ Atmospheric Vigil</span>
+            </div>
+
+            <div class="brutal-glass" style="padding: 16px; background: rgba(2, 6, 18, 0.9);">
+              <div style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase;">Storm Potential</div>
+              <div style="font-family: var(--font-mythic); font-size: 1.3rem; color: var(--cyan-core); font-weight: 800;">1.21 GigaVolts</div>
+              <div style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; margin-top: 10px;">Mjölnir Status</div>
+              <div style="font-family: var(--font-mythic); font-size: 1.1rem; color: var(--gold-asgard); font-weight: 700;">Star-Forged &amp; Tuned</div>
+              <div style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; margin-top: 10px;">Raven Courier</div>
+              <div style="font-size: 0.85rem; color: #ffffff; font-weight: 600;">Direct Candidate Sync</div>
+            </div>
+
+            <div class="brutal-glass" style="padding: 16px; background: rgba(2, 6, 18, 0.9);">
+              <div style="font-family: var(--font-mythic); font-size: 0.88rem; font-weight: 800; color: #ffffff; margin-bottom: 8px;">
+                THE GUARDIAN'S VOW
+              </div>
+              <p style="font-size: 0.82rem; color: var(--text-secondary); font-style: italic; line-height: 1.6;">
+                &ldquo;No storm lasts forever — and you don't have to weather it alone.&rdquo;
+              </p>
+            </div>
+
+            <button type="button" id="dedicated-open-story-btn" class="brutal-btn" style="padding: 12px; width: 100%; justify-content: center;">
+              <span>The Sagas of Thor</span>
+            </button>
+          </div>
+
+          <!-- Right Full Chat Stage -->
+          <div class="dedicated-main-chat">
+            <!-- Dedicated Messages Area -->
+            <div id="dedicated-chat-messages" class="chat-messages-container" style="flex: 1; padding: 24px;"></div>
+
+            <!-- Dedicated Loader -->
+            <div id="dedicated-loader-container" class="hidden" style="padding: 8px 24px;"></div>
+
+            <!-- Dedicated Quick Chips -->
+            <div id="dedicated-quick-chips" class="quick-chips-bar" style="padding: 10px 24px;">
+              <button type="button" class="quick-chip" data-msg="Who forged Mjölnir and how?">Who forged Mjölnir?</button>
+              <button type="button" class="quick-chip" data-msg="Why did you turn away from Asgard's feast halls?">Why did you leave Asgard?</button>
+              <button type="button" class="quick-chip" data-msg="How can I withstand the storm that burdens me?">How to withstand my storm?</button>
+              <button type="button" class="quick-chip" data-beacon="true">⚡ Dispatch distress beacon</button>
+            </div>
+
+            <!-- Dedicated Input Bar -->
+            <div class="chat-input-bar" style="padding: 16px 24px;">
+              <button type="button" id="dedicated-open-beacon-btn" class="brutal-btn" style="padding: 12px 16px;" title="Open Distress Beacon Form">
+                <span>⚡ BEACON</span>
+              </button>
+              <input type="text" id="dedicated-chat-input" class="chat-input-field" placeholder="Speak directly with Thor..." />
+              <button type="button" id="dedicated-send-btn" class="btn-electric" style="padding: 12px 24px; border-radius: 10px;">
+                <span>Send</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Application JavaScript Entry Point (ES Module) -->
+    <script type="module" src="script.js"></script>
   </body>
 </html>

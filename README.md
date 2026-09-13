@@ -1,101 +1,89 @@
-# ⚡ THOR — Interactive Superhero Platform & AI Conversational Guardian
+# THOR — God of Thunder & Guardian of the Storm-Wearied (Vanilla Edition)
 
-> **White Matrix Assignment Submission**  
-> **Superhero:** Thor, God of Thunder (Original Norse Mythological Interpretation)  
-> **Date:** September 13, 2026  
-> **Contact:** +91 88 91 67 61 43 · info@whitematrix.co.in · [www.whitematrix.co.in](https://www.whitematrix.co.in)
+> **Zero Build Step** framework-free edition of the interactive superhero platform & conversational AI guardian. Built with pure HTML5, CSS3, and ES Module JavaScript.
 
 ---
 
-## 🌩️ Overview
+## ⚡ Architecture & File Structure
 
-**THOR** is an immersive superhero landing page and conversational AI platform that reimagines traditional "Contact Us" forms into an authentic narrative encounter with **Thor, God of Thunder**. 
-
-Rooted in public-domain Norse mythology rather than Marvel/Disney cinematic depictions, this project showcases an original visual identity, bespoke artwork, dynamic storm canvas simulations, Web Audio API sound synthesis, and an interactive conversational state machine that captures visitor grievances and dispatches real-time email notifications to the hero's real-world alter ego.
-
----
-
-## ✨ Key Features
-
-### 1. Module A — Story & Mythic Identity
-- **Atmospheric Storm Canvas**: HTML5 Canvas engine simulating angled rain particles, drifting smoke clouds, rising electric embers, and randomized fractal lightning discharges.
-- **Dynamic Lighting & Transitions**: Page-load lightning intro transition, full-screen thunder-crack strobe overlays on summon triggers, and glowing electric borders.
-- **Narrative Chronicle (Origin Lore)**: Interactive 4-chapter progression detailing Thor's pride in Asgard, the fateful mortal tempest, his voluntary exile to Midgard, and the sacred guardian's vow.
-- **Powers & Divine Artifacts**: 5 interactive cards (Lightning Command, Superhuman Strength, Storm-Flight, Weather Calming, Regenerative Healing) with stat bars and unique hover micro-animations (sparks flicker, hammer swing, vortex swirl, vital pulse).
-- **Mjölnir Showcase**: Star-forged geometric war hammer rendered with glowing runes and celestial specifications.
-- **Mission & Character Voice**: Explores both outer physical disasters and inner personal tempests, complete with an interactive Norse quote showcase and Web Audio chime triggers.
-
-### 2. Module B — Conversational Chatbot
-- **Conversational State Machine**: Gathers details **one turn at a time** — never a form disguised as chat:
-  1. **Name** (captures name and responds warmly)
-  2. **Age** (conversational number sanity check between 1–120 with in-character re-prompt)
-  3. **Location** (Midgard realm / city / country)
-  4. **Email Address** (regex format validation with mythological re-prompt if invalid)
-  5. **Urgency Level** (⚡ Low / ⚡⚡ Medium / ⚡⚡⚡ High quick-select chips or free text)
-  6. **Grievance / Request**: *"So... tell me. How can I help you?"* (multi-sentence free-text input)
-  7. **Confirmation & Dispatch**: In-character confirmation + spark celebration confetti
-- **Asgardian Spark Typing Indicator**: Realistic staggered response timing to feel organic and alive.
-- **Session Persistence**: Progress survives accidental page refreshes or scrolls via `sessionStorage`.
-- **Sound FX**: Web Audio API thunder rumbles, lightning cracks, and message spark chimes with global mute controls.
-
-### 3. Module C — Automated Email Notification Backend
-- **Endpoint**: `/api/send-email` (serverless & dev-server compatible).
-- **Subject**: `🦸 Someone Needs Your Help!`
-- **Rich HTML Template**: Formatted with visitor name, age, location, email, urgency level, timestamp, and grievance text.
-- **Delivery Support**: Supports **Resend API**, **Nodemailer SMTP**, and built-in **Verified Raven Simulation**.
-- **Raven Dispatch Inspector**: An evaluator inspection modal accessible right from the chat or floating button to view the rendered email payload with 100% visible proof.
+```
+thor-vanilla/
+├── index.html       → All semantic markup (Landing sections, Modals, Drawers, Chat views, SVGs)
+├── styles.css       → Pure CSS design system, palette tokens, Cyber-Neobrutalism, animations & keyframes
+├── script.js        → Pure ES module (Web Audio engine, StormCanvas, Firebase Auth, Router, Thor AI chat)
+├── assets/          → Unaltered static media (mjolnir.jpg, thor-avatar.jpg, thor-hero.jpg)
+├── favicon.svg      → High-voltage Norse thunderbolt favicon
+├── api/             → Vercel Serverless Functions
+│   ├── chat.js      → NVIDIA NIM AI proxy (GPT-OSS-20B, Llama-3.2, GLM-5.3)
+│   ├── send-email.js→ Email dispatch (Resend API, Nodemailer SMTP, or Raven Simulation)
+│   └── tts.js       → Microsoft Edge Neural TTS audio streamer
+├── vercel.json      → Static hosting rewrites (/api and client routing)
+└── README.md        → Documentation & deployment guide
+```
 
 ---
 
-## 🚀 Quick Start (Run Locally)
+## 🚀 Running Locally
 
+No `npm install`, `vite`, or compilation steps are needed. Serve the `thor-vanilla` directory directly with any static web server:
+
+### Option A: Using `serve`
 ```bash
-# 1. Install dependencies
-npm install
-
-# 2. Start local development server
-npm run dev
+npx serve thor-vanilla -p 3000
 ```
+Open `http://localhost:3000` in your browser.
 
-Visit `http://localhost:5173` in your browser.
-
----
-
-## ⚙️ Environment Variables (Optional for Live Sending)
-
-Create a `.env.local` file in the project root:
-
-```env
-# Alter-ego recipient address
-CANDIDATE_EMAIL=harikrishnankanjingattu2005@gmail.com
-TO_EMAIL=harikrishnankanjingattu2005@gmail.com
-
-# Option A: Resend API (Recommended)
-RESEND_API_KEY=re_your_api_key
-
-# Option B: Nodemailer SMTP
-SMTP_HOST=smtp.gmail.com
-SMTP_PORT=587
-SMTP_SECURE=false
-SMTP_USER=your-smtp-user@gmail.com
-SMTP_PASS=your-app-password
+### Option B: Using Python
+```bash
+cd thor-vanilla
+python -m http.server 3000
 ```
+Open `http://localhost:3000` in your browser.
 
-*(If no keys are provided, the platform seamlessly runs in simulation mode, logging payloads and displaying the email in the live inspector modal).*
-
----
-
-## 🌐 Public Deployment (Vercel Ready)
-
-This repository includes `api/send-email.ts` pre-configured for Vercel Serverless Functions.
-
-1. Push this repository to GitHub.
-2. Import the repository into [Vercel](https://vercel.com).
-3. Set your `CANDIDATE_EMAIL` and `RESEND_API_KEY` (or SMTP credentials) in Vercel Environment Variables.
-4. Deploy! Your static frontend and email API will be live instantly on your public URL.
+### Option C: Using VS Code / IDE Live Server
+Right-click `thor-vanilla/index.html` and click **"Open with Live Server"**.
 
 ---
 
-## 🛡️ Originality & Public Domain Note
+## 🌐 Deploying to Vercel
 
-This project is an original creative work inspired by public-domain Norse mythology. It deliberately avoids Marvel/Disney trademarked suits, character designs, or cinematic storylines, making it completely original and suitable for public hosting and assignment evaluation.
+1. Push or upload the `thor-vanilla` folder to GitHub.
+2. In [Vercel](https://vercel.com), click **Add New Project** and import the repository.
+3. Set the **Root Directory** to `thor-vanilla` (or leave default if the repository root is `thor-vanilla`).
+4. Set **Framework Preset** to **Other** (no build command needed).
+5. Add Environment Variables (optional, see below).
+6. Click **Deploy**.
+
+---
+
+## 🔑 Environment Variables (Vercel Project Settings)
+
+| Variable | Description | Default / Fallback |
+| :--- | :--- | :--- |
+| `NVIDIA_API_KEY` | Optional server-side NVIDIA NIM API key for LLM responses | Pre-configured client key with client-side modal override |
+| `CANDIDATE_EMAIL` | Recipient email address for mortal distress signals | `harikrishnankanjingattu2005@gmail.com` |
+| `RESEND_API_KEY` | Optional Resend API key for cloud email delivery | Falls back to SMTP or verified Raven Simulation |
+| `SMTP_HOST` | SMTP server host (e.g. `smtp.gmail.com`) | Falls back to verified Raven Simulation |
+| `SMTP_PORT` | SMTP port (e.g. `587`) | `587` |
+| `SMTP_USER` | SMTP username | Optional |
+| `SMTP_PASS` | SMTP app password | Optional |
+
+---
+
+## 🛡️ Firebase Authorized Domain Setup
+
+1. Open the [Firebase Console](https://console.firebase.google.com/).
+2. Select the project: `thor-b248f`.
+3. Go to **Authentication** → **Settings** → **Authorized domains**.
+4. Click **Add domain** and enter your production domain (e.g. `your-app.vercel.app` or custom domain).
+5. If running locally or from an un-authorized domain, Thor provides an immediate **"Enter as Guest Warrior"** clearance with 100% full feature parity and an on-screen domain copy button for evaluators.
+
+---
+
+## ⚡ Highlights
+
+- **Zero Build Step**: Pure HTML/CSS/JS with ES module CDN imports.
+- **Strict 2-Color Design**: Pitch Black (`#000000`) and Electric Neon Blue (`#00f2fe`).
+- **Web Audio API Engine**: Synthesizes real thunder rumbles, lightning cracks, and Norse runic chimes without audio asset dependencies.
+- **Interactive Storm Canvas**: 220 rain particles, 45 embers, sky bloom, and click-to-strike branched lightning bolts.
+- **Thor AI Chat & Voice**: Neural audio voice playback + real-time LLM intelligence.

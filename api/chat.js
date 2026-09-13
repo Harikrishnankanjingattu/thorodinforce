@@ -1,20 +1,12 @@
-import type { VercelRequest, VercelResponse } from './types';
-
-interface ChatRequestMessage {
-  role: 'system' | 'user' | 'assistant';
-  content: string;
-}
-
-export default async function handler(req: VercelRequest, res: VercelResponse) {
+export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method Not Allowed' });
   }
 
   const { messages, apiKey } = req.body || {};
-
   const nvidiaKey = apiKey || process.env.NVIDIA_API_KEY;
 
-  const systemPrompt: ChatRequestMessage = {
+  const systemPrompt = {
     role: 'system',
     content: `You are Thor, the Norse God of Thunder and Guardian of the Storm-Wearied (rooted in ancient Norse mythology, an original interpretation distinct from cinema).
 Personality: Booming, warm, protective older sibling, large-hearted, deeply empathetic, with a touch of wry Nordic humor. You walked away from the golden feasts of Asgard to stand alongside mortals in Midgard.
@@ -32,7 +24,7 @@ Keep your responses concise (2 to 4 impactful sentences max), evocative, and in 
   }
 
   try {
-    const formattedMessages: ChatRequestMessage[] = [
+    const formattedMessages = [
       systemPrompt,
       ...(Array.isArray(messages) ? messages : []),
     ];
@@ -90,7 +82,7 @@ Keep your responses concise (2 to 4 impactful sentences max), evocative, and in 
       message: reply,
       model: usedModel,
     });
-  } catch (err: unknown) {
+  } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     console.error('NVIDIA AI connection error:', msg);
     return res.status(200).json({
