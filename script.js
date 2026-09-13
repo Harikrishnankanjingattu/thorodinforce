@@ -16,6 +16,260 @@ import {
   onAuthStateChanged,
 } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
 
+
+/* ============================================================================
+   THEME ENGINE (Dynamic Recoloring & Live Control)
+   ============================================================================ */
+
+const DEFAULT_ACCENT = '#00f2fe';
+
+function hexToRgb(hex) {
+  const clean = hex.replace('#', '');
+  const n = parseInt(clean.length === 3 ? clean.split('').map(c => c + c).join('') : clean, 16);
+  return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+}
+
+function rgbToHex(r, g, b) {
+  const toHex = (c) => Math.min(255, Math.max(0, Math.round(c))).toString(16).padStart(2, '0');
+  return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+}
+
+function rgbToHsl(r, g, b) {
+  r /= 255; g /= 255; b /= 255;
+  const max = Math.max(r, g, b), min = Math.min(r, g, b);
+  let h = 0, s = 0, l = (max + min) / 2;
+
+  if (max !== min) {
+    const d = max - min;
+    s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+    switch (max) {
+      case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+      case g: h = (b - r) / d + 2; break;
+      case b: h = (r - g) / d + 4; break;
+    }
+    h /= 6;
+  }
+  return [h * 360, s * 100, l * 100];
+}
+
+function hslToRgb(h, s, l) {
+  h = ((h % 360) + 360) % 360;
+  s = Math.max(0, Math.min(100, s)) / 100;
+  l = Math.max(0, Math.min(100, l)) / 100;
+
+  const c = (1 - Math.abs(2 * l - 1)) * s;
+  const x = c * (1 - Math.abs((h / 60) % 2 - 1));
+  const m = l - c / 2;
+  let r = 0, g = 0, b = 0;
+
+  if (h >= 0 && h < 60) { r = c; g = x; b = 0; }
+  else if (h < 120) { r = x; g = c; b = 0; }
+  else if (h < 180) { r = 0; g = c; b = x; }
+  else if (h < 240) { r = 0; g = x; b = c; }
+  else if (h < 300) { r = x; g = 0; b = c; }
+  else { r = c; g = 0; b = x; }
+
+  return [Math.round((r + m) * 255), Math.round((g + m) * 255), Math.round((b + m) * 255)];
+}
+
+function shade(hex, { h = 0, s = 0, l = 0 }) {
+  const [r, g, b] = hexToRgb(hex);
+  const [curH, curS, curL] = rgbToHsl(r, g, b);
+  const [newR, newG, newB] = hslToRgb(curH + h, curS + s, curL + l);
+  return rgbToHex(newR, newG, newB);
+}
+
+function getBrightness(hex) {
+  const [r, g, b] = hexToRgb(hex);
+  return (r * 299 + g * 587 + b * 114) / 1000 / 255;
+}
+
+function themeColor(alpha = 1) {
+  const rgb = (getComputedStyle(document.documentElement)
+    .getPropertyValue('--accent-rgb') || '0 242 254').trim().replace(/\s+/g, ',');
+  return `rgba(${rgb},${alpha})`;
+}
+
+function themeColor2(alpha = 1) {
+  const rgb = (getComputedStyle(document.documentElement)
+    .getPropertyValue('--accent-2-rgb') || '0 210 255').trim().replace(/\s+/g, ',');
+  return `rgba(${rgb},${alpha})`;
+}
+
+function currentAccent() {
+  return (getComputedStyle(document.documentElement).getPropertyValue('--accent') || '#00f2fe').trim();
+}
+
+function currentAccent2() {
+  return (getComputedStyle(document.documentElement).getPropertyValue('--accent-2') || '#00d2ff').trim();
+}
+
+function applyTheme(rawHex) {
+  let hex = rawHex;
+  // Perceived brightness safeguard: if too dark (<35%), automatically lighten
+  if (getBrightness(hex) < 0.35) {
+    hex = shade(hex, { l: +30, s: -10 });
+  }
+
+  const root = document.documentElement.style;
+  const [r, g, b] = hexToRgb(hex);
+  const accent2 = shade(hex, { h: -8, l: 0 });
+  const [r2, g2, b2] = hexToRgb(accent2);
+  const accentBright = shade(hex, { l: +20 });
+  const accentDeep = shade(hex, { l: -25 });
+
+  root.setProperty('--accent', hex);
+  root.setProperty('--accent-rgb', `${r} ${g} ${b}`);
+  root.setProperty('--accent-2', accent2);
+  root.setProperty('--accent-2-rgb', `${r2} ${g2} ${b2}`);
+  root.setProperty('--accent-bright', accentBright);
+  root.setProperty('--accent-deep', accentDeep);
+
+  // Surface tints (~6% of accent into black for surfaces, ~4% for backgrounds)
+  const surfR = Math.round(r * 0.06);
+  const surfG = Math.round(g * 0.06);
+  const surfB = Math.round(b * 0.06);
+  root.setProperty('--surface-rgb', `${surfR + 2} ${surfG + 8} ${surfB + 20}`);
+  root.setProperty('--surface-2-rgb', `${surfR + 4} ${surfG + 14} ${surfB + 32}`);
+
+  const bgR = Math.round(r * 0.04);
+  const bgG = Math.round(g * 0.04);
+  const bgB = Math.round(b * 0.04);
+  root.setProperty('--bg-primary', rgbToHex(bgR + 2, bgG + 5, bgB + 12));
+  root.setProperty('--bg-secondary', rgbToHex(bgR + 4, bgG + 12, bgB + 28));
+
+  // Sync meta theme-color and UI displays
+  const metaTheme = document.querySelector('meta[name="theme-color"]');
+  if (metaTheme) metaTheme.setAttribute('content', hex);
+
+  const hexDisplay = document.getElementById('theme-hex-display');
+  if (hexDisplay) hexDisplay.textContent = hex.toUpperCase();
+
+  const colorInput = document.getElementById('theme-color-input');
+  if (colorInput && colorInput.value.toLowerCase() !== hex.toLowerCase()) {
+    colorInput.value = hex;
+  }
+
+  try { localStorage.setItem('thor-accent', hex); } catch (e) {}
+}
+
+function resetTheme() {
+  [
+    '--accent', '--accent-rgb', '--accent-2', '--accent-2-rgb',
+    '--accent-bright', '--accent-deep', '--surface-rgb', '--surface-2-rgb',
+    '--bg-primary', '--bg-secondary'
+  ].forEach(p => document.documentElement.style.removeProperty(p));
+
+  const metaTheme = document.querySelector('meta[name="theme-color"]');
+  if (metaTheme) metaTheme.setAttribute('content', DEFAULT_ACCENT);
+
+  const hexDisplay = document.getElementById('theme-hex-display');
+  if (hexDisplay) hexDisplay.textContent = DEFAULT_ACCENT.toUpperCase();
+
+  const colorInput = document.getElementById('theme-color-input');
+  if (colorInput) colorInput.value = DEFAULT_ACCENT;
+
+  try { localStorage.removeItem('thor-accent'); } catch (e) {}
+}
+
+// Restore saved theme on startup
+const savedAccent = (() => {
+  try { return localStorage.getItem('thor-accent'); } catch (e) { return null; }
+})();
+if (savedAccent && savedAccent.toLowerCase() !== DEFAULT_ACCENT) {
+  applyTheme(savedAccent);
+}
+
+function initThemePicker() {
+  const toggleBtn = document.getElementById('theme-toggle-btn');
+  const panel = document.getElementById('theme-picker-panel');
+  const closeBtn = document.getElementById('theme-panel-close-btn');
+  const colorInput = document.getElementById('theme-color-input');
+  const resetBtn = document.getElementById('theme-reset-btn');
+  const swatches = document.querySelectorAll('.theme-swatch-btn');
+  const hexDisplay = document.getElementById('theme-hex-display');
+
+  if (!toggleBtn || !panel) return;
+
+  // Restore current value to inputs
+  const current = savedAccent || DEFAULT_ACCENT;
+  if (colorInput) colorInput.value = current;
+  if (hexDisplay) hexDisplay.textContent = current.toUpperCase();
+
+  const openPanel = () => {
+    panel.classList.remove('theme-panel-hidden');
+    toggleBtn.setAttribute('aria-expanded', 'true');
+  };
+
+  const closePanel = () => {
+    panel.classList.add('theme-panel-hidden');
+    toggleBtn.setAttribute('aria-expanded', 'false');
+  };
+
+  toggleBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (panel.classList.contains('theme-panel-hidden')) {
+      openPanel();
+    } else {
+      closePanel();
+    }
+  });
+
+  if (closeBtn) {
+    closeBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      closePanel();
+    });
+  }
+
+  // Close when clicking outside
+  document.addEventListener('click', (e) => {
+    if (!panel.contains(e.target) && !toggleBtn.contains(e.target)) {
+      closePanel();
+    }
+  });
+
+  // Escape key closes panel
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !panel.classList.contains('theme-panel-hidden')) {
+      closePanel();
+      toggleBtn.focus();
+    }
+  });
+
+  // Live input update while dragging
+  if (colorInput) {
+    colorInput.addEventListener('input', (e) => {
+      const val = e.target.value;
+      if (hexDisplay) hexDisplay.textContent = val.toUpperCase();
+      applyTheme(val);
+    });
+  }
+
+  // Presets
+  swatches.forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const color = btn.getAttribute('data-color');
+      if (color) {
+        if (color.toLowerCase() === DEFAULT_ACCENT.toLowerCase()) {
+          resetTheme();
+        } else {
+          applyTheme(color);
+        }
+      }
+    });
+  });
+
+  // Reset
+  if (resetBtn) {
+    resetBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      resetTheme();
+    });
+  }
+}
+
 /* ============================================================================
    1. CONFIG & CONSTANTS
    ============================================================================ */
@@ -875,7 +1129,7 @@ function initStormCanvas() {
       segments,
       alpha: 1.0,
       decay: 0.82,
-      glowColor: Math.random() > 0.3 ? '#00f2fe' : '#00d2ff',
+      glowColor: Math.random() > 0.3 ? currentAccent() : currentAccent2(),
     });
 
     setTimeout(() => {
@@ -884,7 +1138,7 @@ function initStormCanvas() {
         segments: reStrike,
         alpha: 0.85,
         decay: 0.78,
-        glowColor: '#00e5ff',
+        glowColor: currentAccent2(),
       });
     }, 70);
 
@@ -917,8 +1171,8 @@ function initStormCanvas() {
     // 2. Sky Flash
     if (skyFlashAlpha > 0.005) {
       const grad = ctx.createLinearGradient(0, 0, 0, height);
-      grad.addColorStop(0, `rgba(0, 242, 254, ${skyFlashAlpha * 0.45})`);
-      grad.addColorStop(0.4, `rgba(0, 180, 255, ${skyFlashAlpha * 0.25})`);
+      grad.addColorStop(0, themeColor(skyFlashAlpha * 0.45));
+      grad.addColorStop(0.4, themeColor2(skyFlashAlpha * 0.25));
       grad.addColorStop(1, 'transparent');
       ctx.fillStyle = grad;
       ctx.fillRect(0, 0, width, height);
@@ -951,7 +1205,7 @@ function initStormCanvas() {
       ctx.stroke();
 
       // Mid glow
-      ctx.strokeStyle = '#00f2fe';
+      ctx.strokeStyle = currentAccent();
       ctx.shadowBlur = 14;
       ctx.lineWidth = 3;
       ctx.beginPath();
@@ -1003,8 +1257,8 @@ function initStormCanvas() {
       sp.y += sp.speedY;
       sp.life -= 1;
       sp.alpha = Math.max(0, sp.life / 140);
-      ctx.fillStyle = `rgba(0, 242, 254, ${sp.alpha * 0.85})`;
-      ctx.shadowColor = '#00f2fe';
+      ctx.fillStyle = themeColor(sp.alpha * 0.85);
+      ctx.shadowColor = currentAccent();
       ctx.shadowBlur = 10;
       ctx.beginPath();
       ctx.arc(sp.x, sp.y, sp.size, 0, Math.PI * 2);
@@ -1103,7 +1357,7 @@ function renderOriginStory() {
   tabsContainer.innerHTML = TIMELINE_STEPS.map((step, idx) => {
     const isSelected = state.activeOriginStep === idx;
     return `
-      <button type="button" class="brutal-btn origin-step-btn" data-step="${idx}" style="background: ${isSelected ? 'rgba(0, 242, 254, 0.18)' : 'rgba(10, 19, 38, 0.65)'}; border: ${isSelected ? '2px solid var(--cyan-core)' : '1.5px solid rgba(0, 242, 254, 0.3)'}; border-radius: 14px; padding: 18px 20px; text-align: left; box-shadow: ${isSelected ? '4px 4px 0px #00f2fe' : '2px 2px 0px rgba(0, 242, 254, 0.2)'}; display: flex; align-items: center; gap: 14px;">
+      <button type="button" class="brutal-btn origin-step-btn" data-step="${idx}" style="background: ${isSelected ? 'rgb(var(--accent-rgb) / 0.18)' : 'rgba(10, 19, 38, 0.65)'}; border: ${isSelected ? '2px solid var(--cyan-core)' : '1.5px solid rgb(var(--accent-rgb) / 0.3)'}; border-radius: 14px; padding: 18px 20px; text-align: left; box-shadow: ${isSelected ? '4px 4px 0px var(--accent)' : '2px 2px 0px rgb(var(--accent-rgb) / 0.2)'}; display: flex; align-items: center; gap: 14px;">
         <div style="width: 42px; height: 42px; border-radius: 10px; background: ${isSelected ? 'var(--cyan-core)' : 'rgba(255, 255, 255, 0.05)'}; display: flex; align-items: center; justify-content: center; color: ${isSelected ? '#04070e' : 'var(--cyan-core)'}; flex-shrink: 0;">
           ${getSvgIcon(step.icon, 20, isSelected ? '#04070e' : 'var(--cyan-core)')}
         </div>
@@ -1132,12 +1386,12 @@ function renderOriginStory() {
       <h3 style="font-family: var(--font-mythic); font-size: clamp(1.6rem, 2.5vw, 2.2rem); color: #ffffff; margin-bottom: 8px;">${cur.title}</h3>
       <div style="font-size: 0.95rem; color: var(--cyan-core); margin-bottom: 20px; font-weight: 500;">${cur.subtitle}</div>
       <p style="font-size: 1.05rem; color: var(--text-secondary); line-height: 1.85; margin-bottom: 28px;">${cur.content}</p>
-      <div style="background: rgba(0, 242, 254, 0.06); border-left: 4px solid var(--cyan-core); padding: 16px 20px; border-radius: 0 10px 10px 0;">
+      <div style="background: rgb(var(--accent-rgb) / 0.06); border-left: 4px solid var(--cyan-core); padding: 16px 20px; border-radius: 0 10px 10px 0;">
         <p style="font-family: var(--font-mythic); font-style: italic; color: #ffffff; font-size: 1rem; line-height: 1.6;">${cur.quote}</p>
       </div>
     </div>
-    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; background: radial-gradient(circle, rgba(0, 242, 254, 0.12) 0%, transparent 70%); padding: 30px; border-radius: 20px;">
-      <div style="width: 180px; height: 180px; border-radius: 50%; border: 2px dashed rgba(0, 242, 254, 0.4); display: flex; align-items: center; justify-content: center; animation: runeShimmer 4s infinite ease-in-out;">
+    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; background: radial-gradient(circle, rgb(var(--accent-rgb) / 0.12) 0%, transparent 70%); padding: 30px; border-radius: 20px;">
+      <div style="width: 180px; height: 180px; border-radius: 50%; border: 2px dashed rgb(var(--accent-rgb) / 0.4); display: flex; align-items: center; justify-content: center; animation: runeShimmer 4s infinite ease-in-out;">
         <span style="font-family: var(--font-mythic); font-size: 4.5rem; color: var(--cyan-core); text-shadow: 0 0 30px var(--cyan-core);">${cur.runic}</span>
       </div>
       <div style="margin-top: 24px; text-align: center; font-family: var(--font-mythic); font-size: 0.85rem; letter-spacing: 0.1em; color: var(--text-muted); text-transform: uppercase;">Ancient Elder Futhark Key</div>
@@ -1165,8 +1419,8 @@ function renderPowers() {
         </div>
         <div>
           <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
-            <div style="width: 54px; height: 54px; border-radius: 14px; background: radial-gradient(circle, ${p.accentColor}26 0%, rgba(10, 19, 38, 0.8) 100%); border: 1px solid ${p.accentColor}66; display: flex; align-items: center; justify-content: center; color: ${p.accentColor};">
-              <div class="power-icon-wrap">${getSvgIcon(p.icon, 26, p.accentColor)}</div>
+            <div style="width: 54px; height: 54px; border-radius: 14px; background: radial-gradient(circle, rgb(var(--accent-rgb) / 0.15) 0%, rgba(10, 19, 38, 0.8) 100%); border: 1px solid rgb(var(--accent-rgb) / 0.4); display: flex; align-items: center; justify-content: center; color: var(--accent);">
+              <div class="power-icon-wrap">${getSvgIcon(p.icon, 26, "var(--accent)")}</div>
             </div>
             <span style="font-size: 0.72rem; letter-spacing: 0.12em; color: var(--text-muted); text-transform: uppercase; font-family: var(--font-mythic); font-weight: 600;">
               ${p.category}
@@ -1178,10 +1432,10 @@ function renderPowers() {
         <div>
           <div style="display: flex; justify-content: space-between; font-size: 0.75rem; font-family: var(--font-mythic); margin-bottom: 8px; color: var(--text-muted);">
             <span>${p.statName}</span>
-            <span style="color: ${p.accentColor}; font-weight: 700;">${p.statVal}%</span>
+            <span style="color: var(--accent); font-weight: 700;">${p.statVal}%</span>
           </div>
           <div style="width: 100%; height: 6px; background: rgba(255, 255, 255, 0.08); border-radius: 4px; overflow: hidden;">
-            <div style="width: ${p.statVal}%; height: 100%; background: linear-gradient(90deg, ${p.accentColor}88 0%, ${p.accentColor} 100%); border-radius: 4px; box-shadow: 0 0 10px ${p.accentColor};"></div>
+            <div style="width: ${p.statVal}%; height: 100%; background: linear-gradient(90deg, rgb(var(--accent-rgb) / 0.55) 0%, var(--accent) 100%); border-radius: 4px; box-shadow: 0 0 10px var(--accent);"></div>
           </div>
         </div>
       </div>
@@ -1208,9 +1462,9 @@ function renderPersonality() {
   if (!traitsGrid || !tabsContainer || !quoteDisplay) return;
 
   traitsGrid.innerHTML = PERSONALITY_TRAITS.map((t) => `
-    <div class="brutal-glass" style="padding: 30px; border-radius: 18px; border: 2px solid var(--cyan-core); box-shadow: 4px 4px 0px #00f2fe; background: rgba(2, 6, 18, 0.88);">
-      <div style="width: 46px; height: 46px; border-radius: 12px; background: ${t.accent}20; display: flex; align-items: center; justify-content: center; color: ${t.accent}; margin-bottom: 18px;">
-        ${getSvgIcon(t.icon, 22, t.accent)}
+    <div class="brutal-glass" style="padding: 30px; border-radius: 18px; border: 2px solid var(--cyan-core); box-shadow: 4px 4px 0px var(--accent); background: rgba(2, 6, 18, 0.88);">
+      <div style="width: 46px; height: 46px; border-radius: 12px; background: rgb(var(--accent-rgb) / 0.15); display: flex; align-items: center; justify-content: center; color: var(--accent); margin-bottom: 18px;">
+        ${getSvgIcon(t.icon, 22, "var(--accent)")}
       </div>
       <h3 style="font-family: var(--font-mythic); font-size: 1.15rem; color: #ffffff; margin-bottom: 10px;">${t.title}</h3>
       <p style="font-size: 0.92rem; color: var(--text-secondary); line-height: 1.7;">${t.desc}</p>
@@ -1220,7 +1474,7 @@ function renderPersonality() {
   tabsContainer.innerHTML = QUOTES.map((q, idx) => {
     const isSelected = state.activeQuoteIdx === idx;
     return `
-      <button type="button" class="quote-tab-btn" data-idx="${idx}" style="background: ${isSelected ? 'rgba(0, 242, 254, 0.18)' : 'rgba(255, 255, 255, 0.04)'}; border: ${isSelected ? '1px solid var(--cyan-core)' : '1px solid var(--border-subtle)'}; border-radius: 30px; padding: 8px 18px; color: ${isSelected ? 'var(--cyan-core)' : 'var(--text-secondary)'}; font-family: var(--font-mythic); font-size: 0.82rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px;">
+      <button type="button" class="quote-tab-btn" data-idx="${idx}" style="background: ${isSelected ? 'rgb(var(--accent-rgb) / 0.18)' : 'rgba(255, 255, 255, 0.04)'}; border: ${isSelected ? '1px solid var(--cyan-core)' : '1px solid var(--border-subtle)'}; border-radius: 30px; padding: 8px 18px; color: ${isSelected ? 'var(--cyan-core)' : 'var(--text-secondary)'}; font-family: var(--font-mythic); font-size: 0.82rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px;">
         <span>${q.norseWord}</span>
         ${isSelected ? getSvgIcon('volume2', 14, 'var(--cyan-core)') : ''}
       </button>
@@ -1236,7 +1490,7 @@ function renderPersonality() {
 
   const curQ = QUOTES[state.activeQuoteIdx];
   quoteDisplay.innerHTML = `
-    <div style="font-family: var(--font-mythic); font-size: 4rem; color: rgba(0, 242, 254, 0.25); position: absolute; top: -20px; left: -10px; user-select: none;">“</div>
+    <div style="font-family: var(--font-mythic); font-size: 4rem; color: rgb(var(--accent-rgb) / 0.25); position: absolute; top: -20px; left: -10px; user-select: none;">“</div>
     <div style="position: relative; z-index: 1; padding-left: 30px;">
       <p style="font-family: var(--font-mythic); font-size: clamp(1.2rem, 2.5vw, 1.6rem); color: #ffffff; line-height: 1.6; font-style: italic; margin-bottom: 16px;">
         ${curQ.quote}
@@ -1305,7 +1559,7 @@ function renderChatMessages(container) {
             <img src="assets/thor-avatar.jpg" alt="Thor" style="width: 100%; height: 100%; object-fit: cover;" />
           </div>
           <div style="max-width: 82%;">
-            <div style="background: rgba(4, 14, 32, 0.94); border: 1px solid rgba(0, 242, 254, 0.35); border-radius: 0 14px 14px 14px; padding: 12px 16px; color: #ffffff; font-size: 0.92rem; line-height: 1.6; white-space: pre-wrap; box-shadow: 0 4px 15px rgba(0,0,0,0.4);">
+            <div style="background: rgba(4, 14, 32, 0.94); border: 1px solid rgb(var(--accent-rgb) / 0.35); border-radius: 0 14px 14px 14px; padding: 12px 16px; color: #ffffff; font-size: 0.92rem; line-height: 1.6; white-space: pre-wrap; box-shadow: 0 4px 15px rgba(0,0,0,0.4);">
               ${m.text}
             </div>
             <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 4px; padding: 0 4px;">
@@ -1321,7 +1575,7 @@ function renderChatMessages(container) {
       return `
         <div style="display: flex; justify-content: flex-end;">
           <div style="max-width: 82%;">
-            <div style="background: linear-gradient(135deg, #051a36 0%, #0b3060 100%); border: 1.5px solid var(--cyan-core); border-radius: 14px 0 14px 14px; padding: 12px 16px; color: #ffffff; font-size: 0.92rem; line-height: 1.6; box-shadow: 2px 2px 0px #00f2fe;">
+            <div style="background: linear-gradient(135deg, #051a36 0%, #0b3060 100%); border: 1.5px solid var(--cyan-core); border-radius: 14px 0 14px 14px; padding: 12px 16px; color: #ffffff; font-size: 0.92rem; line-height: 1.6; box-shadow: 2px 2px 0px var(--accent);">
               ${m.text}
             </div>
             <div style="text-align: right; margin-top: 4px; padding-right: 4px;">
@@ -1385,7 +1639,7 @@ function renderModals() {
     if (state.showStoryModal) {
       const curSaga = SAGAS[state.storyActiveSaga];
       storyBackdrop.innerHTML = `
-        <div class="brutal-glass" style="max-width: 780px; width: 100%; max-height: 90vh; background: rgba(2, 7, 18, 0.96); display: flex; flex-direction: column; overflow: hidden; border: 2px solid var(--cyan-core); box-shadow: 6px 6px 0px #00f2fe;">
+        <div class="brutal-glass" style="max-width: 780px; width: 100%; max-height: 90vh; background: rgba(2, 7, 18, 0.96); display: flex; flex-direction: column; overflow: hidden; border: 2px solid var(--cyan-core); box-shadow: 6px 6px 0px var(--accent);">
           <div style="padding: 16px 22px; background: linear-gradient(90deg, #000000 0%, #031428 100%); border-bottom: 2px solid var(--cyan-core); display: flex; align-items: center; justify-content: space-between;">
             <div style="display: flex; align-items: center; gap: 10px;">
               <div style="width: 32px; height: 32px; background: var(--cyan-core); color: #000000; display: flex; align-items: center; justify-content: center; border-radius: 6px; font-weight: 900;">📖</div>
@@ -1397,9 +1651,9 @@ function renderModals() {
             <button type="button" id="close-story-modal-btn" class="brutal-btn" style="padding: 4px 8px;">✕</button>
           </div>
 
-          <div style="display: flex; gap: 8px; padding: 12px 18px; background: rgba(0, 0, 0, 0.6); border-bottom: 1px solid rgba(0, 242, 254, 0.2); overflow-x: auto;">
+          <div style="display: flex; gap: 8px; padding: 12px 18px; background: rgba(0, 0, 0, 0.6); border-bottom: 1px solid rgb(var(--accent-rgb) / 0.2); overflow-x: auto;">
             ${SAGAS.map((s, idx) => `
-              <button type="button" class="saga-tab-btn" data-idx="${idx}" style="background: ${state.storyActiveSaga === idx ? 'var(--cyan-core)' : '#020712'}; border: ${state.storyActiveSaga === idx ? '2px solid #ffffff' : '1px solid rgba(0, 242, 254, 0.3)'}; color: ${state.storyActiveSaga === idx ? '#000000' : 'var(--text-secondary)'}; padding: 6px 12px; border-radius: 8px; font-size: 0.72rem; font-weight: 700; cursor: pointer;">
+              <button type="button" class="saga-tab-btn" data-idx="${idx}" style="background: ${state.storyActiveSaga === idx ? 'var(--cyan-core)' : '#020712'}; border: ${state.storyActiveSaga === idx ? '2px solid #ffffff' : '1px solid rgb(var(--accent-rgb) / 0.3)'}; color: ${state.storyActiveSaga === idx ? '#000000' : 'var(--text-secondary)'}; padding: 6px 12px; border-radius: 8px; font-size: 0.72rem; font-weight: 700; cursor: pointer;">
                 ${s.title}
               </button>
             `).join('')}
@@ -1417,16 +1671,16 @@ function renderModals() {
               </button>
             </div>
 
-            <div style="padding: 18px 20px; background: rgba(0, 0, 0, 0.7); border: 1.5px solid rgba(0, 242, 254, 0.3); border-radius: 12px; font-size: 0.94rem; line-height: 1.7; color: #dff0fa;">
+            <div style="padding: 18px 20px; background: rgba(0, 0, 0, 0.7); border: 1.5px solid rgb(var(--accent-rgb) / 0.3); border-radius: 12px; font-size: 0.94rem; line-height: 1.7; color: #dff0fa;">
               ${curSaga.fullText}
             </div>
 
-            <div style="padding: 14px 18px; background: rgba(0, 242, 254, 0.06); border-left: 4px solid var(--cyan-core); border-radius: 0 10px 10px 0; font-style: italic; color: var(--cyan-core); font-size: 0.88rem;">
+            <div style="padding: 14px 18px; background: rgb(var(--accent-rgb) / 0.06); border-left: 4px solid var(--cyan-core); border-radius: 0 10px 10px 0; font-style: italic; color: var(--cyan-core); font-size: 0.88rem;">
               ${curSaga.quote}
             </div>
           </div>
 
-          <div style="padding: 12px 22px; background: #000000; border-top: 1px solid rgba(0, 242, 254, 0.25); display: flex; justify-content: flex-end;">
+          <div style="padding: 12px 22px; background: #000000; border-top: 1px solid rgb(var(--accent-rgb) / 0.25); display: flex; justify-content: flex-end;">
             <button type="button" id="return-sanctuary-story-btn" class="brutal-btn" style="padding: 6px 16px; font-size: 0.78rem;">Return to Sanctuary</button>
           </div>
         </div>
@@ -1470,10 +1724,10 @@ function renderModals() {
     if (state.emailInspectorOpen && state.emailInspectorData) {
       const d = state.emailInspectorData;
       emailBackdrop.innerHTML = `
-        <div class="glass-panel" style="max-width: 720px; width: 100%; max-height: 90vh; background: #070d1a; border: 1px solid var(--cyan-core); box-shadow: 0 20px 60px rgba(0,0,0,0.9), 0 0 40px rgba(0,242,254,0.25); display: flex; flex-direction: column; border-radius: 24px; overflow: hidden;">
+        <div class="glass-panel" style="max-width: 720px; width: 100%; max-height: 90vh; background: #070d1a; border: 1px solid var(--cyan-core); box-shadow: 0 20px 60px rgba(0,0,0,0.9), 0 0 40px rgb(var(--accent-rgb) / 0.25); display: flex; flex-direction: column; border-radius: 24px; overflow: hidden;">
           <div style="padding: 20px 24px; border-bottom: 1px solid rgba(255,255,255,0.08); display: flex; align-items: center; justify-content: space-between; background: rgba(11, 22, 44, 0.6);">
             <div style="display: flex; align-items: center; gap: 12px;">
-              <div style="width: 36px; height: 36px; border-radius: 10px; background: rgba(0, 242, 254, 0.15); border: 1px solid var(--cyan-core); display: flex; align-items: center; justify-content: center; color: var(--cyan-core);">
+              <div style="width: 36px; height: 36px; border-radius: 10px; background: rgb(var(--accent-rgb) / 0.15); border: 1px solid var(--cyan-core); display: flex; align-items: center; justify-content: center; color: var(--cyan-core);">
                 ${getSvgIcon('mail', 18, 'var(--cyan-core)')}
               </div>
               <div>
@@ -1485,9 +1739,9 @@ function renderModals() {
           </div>
 
           <div style="padding: 24px; overflow-y: auto; flex: 1;">
-            <div style="display: flex; align-items: center; justify-content: space-between; padding: 12px 18px; border-radius: 12px; background: rgba(0, 242, 254, 0.08); border: 1px solid rgba(0, 242, 254, 0.3); margin-bottom: 20px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; padding: 12px 18px; border-radius: 12px; background: rgb(var(--accent-rgb) / 0.08); border: 1px solid rgb(var(--accent-rgb) / 0.3); margin-bottom: 20px;">
               <span style="font-size: 0.85rem; color: #ffffff; font-weight: 600;">Dispatched to Alter Ego (${d.deliveryMode})</span>
-              <span style="font-size: 0.75rem; padding: 3px 10px; border-radius: 20px; background: rgba(0, 242, 254, 0.15); border: 1px solid var(--cyan-core); color: var(--cyan-core);">NEAR REAL-TIME</span>
+              <span style="font-size: 0.75rem; padding: 3px 10px; border-radius: 20px; background: rgb(var(--accent-rgb) / 0.15); border: 1px solid var(--cyan-core); color: var(--cyan-core);">NEAR REAL-TIME</span>
             </div>
 
             <div style="margin-bottom: 16px;">
@@ -1497,8 +1751,8 @@ function renderModals() {
               </div>
             </div>
 
-            <div style="background: #04070e; border: 1px solid rgba(0, 242, 254, 0.25); border-radius: 14px; padding: 24px;">
-              <div style="border-bottom: 2px solid rgba(0, 242, 254, 0.3); padding-bottom: 16px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between;">
+            <div style="background: #04070e; border: 1px solid rgb(var(--accent-rgb) / 0.25); border-radius: 14px; padding: 24px;">
+              <div style="border-bottom: 2px solid rgb(var(--accent-rgb) / 0.3); padding-bottom: 16px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between;">
                 <div>
                   <div style="font-family: var(--font-mythic); font-size: 1.2rem; color: var(--cyan-core); font-weight: 800;">⚡ THOR DISPATCH COURIER</div>
                   <div style="font-size: 0.78rem; color: var(--text-muted);">Asgardian Raven Transmission · Midgard Watchtower</div>
@@ -1561,15 +1815,15 @@ function renderModals() {
 
 function getMjolnirLoaderHtml() {
   return `
-    <div style="display: flex; align-items: center; justify-content: center; gap: 14px; padding: 12px 18px; background: rgba(2, 6, 18, 0.88); border-radius: 14px; border: 1.5px solid var(--cyan-core); box-shadow: 4px 4px 0px #00f2fe;">
+    <div style="display: flex; align-items: center; justify-content: center; gap: 14px; padding: 12px 18px; background: rgba(2, 6, 18, 0.88); border-radius: 14px; border: 1.5px solid var(--cyan-core); box-shadow: 4px 4px 0px var(--accent);">
       <div style="position: relative; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
         <div style="position: absolute; inset: 0; border-radius: 50%; border: 1.5px dashed var(--cyan-core); animation: rune-spin-reverse 6s linear infinite;"></div>
-        <div style="width: 32px; height: 32px; border-radius: 50%; overflow: hidden; animation: mjolnir-3d-spin 2.2s infinite; border: 2px solid #00f2fe; background: #000000;">
+        <div style="width: 32px; height: 32px; border-radius: 50%; overflow: hidden; animation: mjolnir-3d-spin 2.2s infinite; border: 2px solid var(--accent); background: #000000;">
           <img src="assets/mjolnir.jpg" alt="Mjölnir" style="width: 100%; height: 100%; object-fit: cover; transform: scale(1.15);" />
         </div>
       </div>
       <div>
-        <div style="font-family: var(--font-mythic); font-size: 0.78rem; font-weight: 800; color: #00f2fe; text-transform: uppercase;">
+        <div style="font-family: var(--font-mythic); font-size: 0.78rem; font-weight: 800; color: var(--accent); text-transform: uppercase;">
           ⚡ Mjölnir Channeling Storm Thunder...
         </div>
         <div style="font-size: 0.68rem; color: rgba(255, 255, 255, 0.75); font-style: italic;">
@@ -1796,7 +2050,7 @@ async function handleBeaconDispatch(e) {
       particleCount: 90,
       spread: 70,
       origin: { y: 0.8 },
-      colors: ['#00f2fe', '#00d2ff', '#ffffff'],
+      colors: [currentAccent(), currentAccent2(), '#ffffff'],
     });
   }
 
