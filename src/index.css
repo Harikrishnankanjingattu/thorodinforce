@@ -1,0 +1,494 @@
+/* ==========================================================================
+   THOR: GOD OF THUNDER — DESIGN SYSTEM & TOKENS
+   STRICT 2-COLOR PALETTE: PITCH BLACK & NEON BLUE ONLY
+   ========================================================================== */
+
+:root {
+  /* Color Palette: Pure Black & Electric Neon Blue */
+  --bg-abyss: #000000;
+  --bg-primary: #02050c;
+  --bg-secondary: #040c1c;
+  --bg-surface: rgba(2, 8, 20, 0.88);
+  --bg-surface-elevated: rgba(4, 14, 32, 0.94);
+  --bg-glass: rgba(1, 6, 16, 0.8);
+
+  /* Neon Blue Accents */
+  --cyan-core: #00f2fe;
+  --cyan-electric: #00d2ff;
+  --cyan-glow: rgba(0, 242, 254, 0.55);
+  --cyan-dim: rgba(0, 242, 254, 0.15);
+
+  --neon-blue: #00e5ff;
+  --neon-blue-bright: #66f5ff;
+  --neon-blue-deep: #0088ff;
+
+  /* Aliases for consistency (Strictly mapped to Neon Blue) */
+  --violet-arc: #00d2ff;
+  --violet-glow: rgba(0, 210, 255, 0.4);
+  --gold-asgard: #00f2fe;
+  --gold-glow: rgba(0, 242, 254, 0.35);
+
+  /* Text & Lines */
+  --text-primary: #ffffff;
+  --text-secondary: #b5e2fa;
+  --text-muted: #5e8aa8;
+  --border-subtle: rgba(0, 242, 254, 0.22);
+  --border-glow: rgba(0, 242, 254, 0.7);
+  --border-gold: rgba(0, 242, 254, 0.4);
+
+  /* Typography */
+  --font-mythic: 'Cinzel', serif;
+  --font-ornate: 'Cinzel Decorative', serif;
+  --font-sans: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+
+  /* Shadows & Elevations */
+  --shadow-storm: 0 10px 35px -5px rgba(0, 0, 0, 0.95);
+  --shadow-electric: 0 0 25px rgba(0, 242, 254, 0.5), 0 0 60px rgba(0, 170, 255, 0.35);
+  --shadow-asgard: 0 0 30px rgba(0, 242, 254, 0.45);
+
+  /* Cyber-Neobrutalism & Glassmorphism Tokens */
+  --brutal-border: 2px solid var(--cyan-core);
+  --brutal-border-thick: 3px solid var(--cyan-core);
+  --brutal-shadow-sm: 2px 2px 0px #00f2fe;
+  --brutal-shadow: 4px 4px 0px #00f2fe;
+  --brutal-shadow-lg: 6px 6px 0px #00f2fe;
+  --brutal-shadow-glow: 4px 4px 0px #00f2fe, 0 0 25px rgba(0, 242, 254, 0.45);
+  --brutal-glass-bg: rgba(3, 8, 20, 0.88);
+  --brutal-glass-elevated: rgba(5, 14, 30, 0.92);
+
+  /* Transitions */
+  --transition-fast: 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  --transition-smooth: 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  --transition-slow: 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Reset & Base */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  color-scheme: dark;
+  background-color: var(--bg-abyss);
+  font-family: var(--font-sans);
+  color: var(--text-primary);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  overflow-x: hidden;
+  min-height: 100vh;
+  position: relative;
+  background-color: var(--bg-abyss);
+}
+
+/* Typography Helpers */
+h1, h2, h3, h4, .font-mythic {
+  font-family: var(--font-mythic);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.font-ornate {
+  font-family: var(--font-ornate);
+}
+
+/* Selection */
+::selection {
+  background: var(--cyan-core);
+  color: #000000;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 7px;
+}
+::-webkit-scrollbar-track {
+  background: #000000;
+}
+::-webkit-scrollbar-thumb {
+  background: #031428;
+  border-radius: 4px;
+  border: 1px solid var(--border-subtle);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--cyan-core);
+  box-shadow: 0 0 12px var(--cyan-core);
+}
+
+/* Global Container */
+.container {
+  width: 100%;
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* Electric Button & CTA */
+.btn-electric {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  background: linear-gradient(135deg, #020a16 0%, #051a36 50%, #002244 100%);
+  color: #ffffff;
+  font-family: var(--font-mythic);
+  font-size: 0.95rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 14px 32px;
+  border-radius: 8px;
+  border: 1.5px solid var(--cyan-core);
+  box-shadow: 0 0 25px var(--cyan-glow), inset 0 0 15px rgba(0, 242, 254, 0.3);
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: all var(--transition-fast);
+  text-decoration: none;
+}
+
+.btn-electric::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(0, 242, 254, 0.4) 0%, transparent 70%);
+  opacity: 0;
+  transform: scale(0.5);
+  transition: opacity var(--transition-fast), transform var(--transition-fast);
+}
+
+.btn-electric:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 40px var(--cyan-core), 0 0 70px var(--cyan-electric), inset 0 0 25px rgba(0, 242, 254, 0.5);
+  border-color: #ffffff;
+  color: #ffffff;
+}
+
+.btn-electric:hover::before {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.btn-electric:active {
+  transform: translateY(1px);
+}
+
+/* Secondary Button */
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: rgba(2, 8, 20, 0.7);
+  color: var(--text-primary);
+  font-family: var(--font-mythic);
+  font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  padding: 13px 26px;
+  border-radius: 8px;
+  border: 1px solid var(--border-subtle);
+  backdrop-filter: blur(10px);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  text-decoration: none;
+}
+
+.btn-secondary:hover {
+  background: rgba(4, 14, 32, 0.9);
+  border-color: var(--cyan-core);
+  color: var(--cyan-core);
+  box-shadow: 0 0 25px var(--cyan-glow);
+  transform: translateY(-2px);
+}
+
+/* Glowing Runic Badges */
+.badge-runic {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border-radius: 30px;
+  background: rgba(0, 242, 254, 0.1);
+  border: 1px solid rgba(0, 242, 254, 0.45);
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: var(--cyan-core);
+  text-transform: uppercase;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 0 15px rgba(0, 242, 254, 0.2);
+}
+
+.badge-gold {
+  background: rgba(0, 242, 254, 0.15);
+  border-color: var(--cyan-core);
+  color: var(--cyan-core);
+}
+
+/* Glassmorphism Panel */
+.glass-panel {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: 16px;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: var(--shadow-storm);
+  position: relative;
+  overflow: hidden;
+  transition: border-color var(--transition-smooth), transform var(--transition-smooth), box-shadow var(--transition-smooth);
+}
+
+.glass-panel:hover {
+  border-color: var(--border-glow);
+  box-shadow: var(--shadow-storm), 0 0 35px rgba(0, 242, 254, 0.3);
+}
+
+/* ==========================================================================
+   CYBER-NEOBRUTALIST GLASS (VBRUTALISM + GLASSMORHPHISM)
+   Bold 2px cyan outlines + hard 4px cyan drop shadows + frosted glass
+   ========================================================================== */
+.brutal-glass {
+  background: var(--brutal-glass-bg);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 2px solid var(--cyan-core);
+  box-shadow: var(--brutal-shadow);
+  border-radius: 14px;
+  position: relative;
+  transition: all var(--transition-fast);
+}
+
+.brutal-glass:hover {
+  box-shadow: var(--brutal-shadow-glow);
+  transform: translate(-1px, -1px);
+}
+
+.brutal-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: #000000;
+  border: 2px solid var(--cyan-core);
+  box-shadow: var(--brutal-shadow-sm);
+  color: var(--cyan-core);
+  font-family: var(--font-mythic);
+  font-size: 0.82rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-decoration: none;
+}
+
+.brutal-btn:hover {
+  background: var(--cyan-core);
+  color: #000000;
+  box-shadow: var(--brutal-shadow);
+  transform: translate(-1px, -1px);
+}
+
+.brutal-btn:active {
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0px #00f2fe;
+}
+
+.brutal-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  background: #000000;
+  border: 1.5px solid var(--cyan-core);
+  box-shadow: 2px 2px 0px var(--cyan-core);
+  color: var(--cyan-core);
+  font-family: var(--font-mythic);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* High-Voltage Ambient Lightning Aura */
+.lightning-aura-anim {
+  animation: lightningAura 4s ease-in-out infinite alternate;
+}
+
+@keyframes lightningAura {
+  0% {
+    box-shadow: 0 0 25px rgba(0, 242, 254, 0.25), inset 0 0 15px rgba(0, 242, 254, 0.1);
+  }
+  50% {
+    box-shadow: 0 0 45px rgba(0, 242, 254, 0.6), 0 0 80px rgba(0, 210, 255, 0.35), inset 0 0 25px rgba(0, 242, 254, 0.25);
+  }
+  100% {
+    box-shadow: 0 0 30px rgba(0, 242, 254, 0.35), inset 0 0 15px rgba(0, 242, 254, 0.15);
+  }
+}
+
+/* Section Divider with Traveling Lightning Streak */
+.section-divider {
+  position: relative;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent 0%, rgba(0, 242, 254, 0.15) 20%, rgba(0, 242, 254, 0.7) 50%, rgba(0, 242, 254, 0.15) 80%, transparent 100%);
+  margin: 60px 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.section-divider::after {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -140px;
+  width: 140px;
+  height: 6px;
+  border-radius: 3px;
+  background: linear-gradient(90deg, transparent, #ffffff 40%, #00f2fe 70%, #00d2ff 90%, transparent);
+  box-shadow: 0 0 18px #00f2fe, 0 0 30px #00d2ff;
+  animation: lightningStreak 4.5s linear infinite;
+  pointer-events: none;
+}
+
+.section-divider::before {
+  content: 'ᚦ'; /* Norse Rune Thurisaz (Thor) */
+  font-family: var(--font-mythic);
+  font-size: 1.2rem;
+  color: var(--cyan-core);
+  background: #000000;
+  padding: 0 16px;
+  text-shadow: 0 0 14px var(--cyan-core);
+  z-index: 1;
+}
+
+@keyframes lightningStreak {
+  0% { left: -140px; opacity: 0; }
+  15% { opacity: 1; }
+  85% { opacity: 1; }
+  100% { left: 100%; opacity: 0; }
+}
+
+@keyframes electricHeading {
+  0%, 100% {
+    text-shadow: 0 0 20px rgba(0, 242, 254, 0.5), 0 0 45px rgba(0, 242, 254, 0.3);
+  }
+  50% {
+    text-shadow: 0 0 40px rgba(0, 242, 254, 1), 0 0 80px rgba(0, 210, 255, 0.8), 0 0 120px rgba(0, 242, 254, 0.5);
+  }
+}
+
+.electric-title-anim {
+  animation: electricHeading 3.5s ease-in-out infinite;
+}
+
+/* Pulse Keyframes */
+@keyframes electricPulse {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(0, 242, 254, 0.45), 0 0 40px rgba(0, 210, 255, 0.25);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(0, 242, 254, 0.9), 0 0 75px rgba(0, 210, 255, 0.5);
+  }
+}
+
+@keyframes runeShimmer {
+  0% {
+    text-shadow: 0 0 8px var(--cyan-core);
+  }
+  50% {
+    text-shadow: 0 0 24px var(--cyan-core), 0 0 45px var(--cyan-electric);
+  }
+  100% {
+    text-shadow: 0 0 8px var(--cyan-core);
+  }
+}
+
+@keyframes floatMjolnir {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-10px) rotate(1deg);
+  }
+}
+
+/* Micro-animations for power cards */
+@keyframes lightningFlicker {
+  0%, 100% { opacity: 1; filter: drop-shadow(0 0 10px var(--cyan-core)); }
+  25% { opacity: 0.4; filter: drop-shadow(0 0 3px var(--cyan-core)); }
+  50% { opacity: 1; filter: drop-shadow(0 0 20px var(--cyan-core)); }
+  75% { opacity: 0.6; filter: drop-shadow(0 0 8px var(--cyan-core)); }
+}
+
+@keyframes hammerSpin {
+  0% { transform: rotate(0deg); }
+  25% { transform: rotate(-15deg); }
+  75% { transform: rotate(20deg); }
+  100% { transform: rotate(0deg); }
+}
+
+@keyframes windSwirl {
+  0% { transform: rotate(0deg) scale(1); }
+  50% { transform: rotate(180deg) scale(1.15); }
+  100% { transform: rotate(360deg) scale(1); }
+}
+
+@keyframes vitalPulse {
+  0%, 100% { transform: scale(1); filter: drop-shadow(0 0 8px var(--cyan-core)); }
+  50% { transform: scale(1.2); filter: drop-shadow(0 0 22px var(--cyan-core)); }
+}
+
+@keyframes stormWave {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+/* Full Screen Thunder Crack Overlay */
+.thunder-crack-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: #ffffff;
+  pointer-events: none;
+  z-index: 99999;
+  opacity: 0;
+  transition: opacity 0.05s ease;
+}
+
+.thunder-crack-active {
+  animation: thunderStrobe 0.45s ease-out forwards;
+}
+
+@keyframes thunderStrobe {
+  0% { opacity: 0.95; background-color: #ffffff; }
+  20% { opacity: 0.2; }
+  35% { opacity: 0.85; background-color: #00f2fe; }
+  55% { opacity: 0.1; }
+  70% { opacity: 0.5; background-color: #00d2ff; }
+  100% { opacity: 0; }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
